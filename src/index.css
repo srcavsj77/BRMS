@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans bg-white text-[#444444];
+  }
+}
+
+.cards-dimming-container {
+  transition: all 0.3s ease-in-out;
+}
+
+body.modal-open .cards-dimming-container {
+  filter: blur(4px) grayscale(0.8);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

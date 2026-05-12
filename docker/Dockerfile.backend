@@ -1,0 +1,28 @@
+FROM node:20-alpine
+
+# Usar diretório de trabalho seguro
+WORKDIR /usr/src/app
+
+# Instalar dependências apenas de produção para reduzir superfície de ataque
+COPY package.json package-lock.json ./
+RUN npm ci --only=production
+
+# Copiar código-fonte do backend
+# (No novo cenário, movemos o server.js e afins para a pasta api)
+COPY api/ ./api/
+COPY db.json ./
+# Se houver utilitários ou dependências extras
+# COPY hash.js ./
+
+# Definir variável de ambiente de produção
+ENV NODE_ENV=production
+
+# Criar usuário não root e mudar propriedade dos arquivos para ele (Boas práticas de segurança Docker)
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+RUN chown -R appuser:appgroup /usr/src/app
+USER appuser
+
+EXPOSE 3333
+
+# Comando de inicialização
+CMD ["node", "api/server.js"]

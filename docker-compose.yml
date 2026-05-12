@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  brms-backend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.backend
+    ports:
+      - "3333:3333"
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-brms_fgv_super_secret_key_2026}
+      - PORT=3333
+    volumes:
+      - ./db.json:/usr/src/app/db.json
+    restart: always
+
+  brms-frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - brms-backend
+    restart: always

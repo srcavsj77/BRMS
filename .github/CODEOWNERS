@@ -1,0 +1,9 @@
+# CODEOWNERS file
+# Define code owners for specific folders and files
+
+*       @carlos.junior
+/src/   @frontend-team
+/api/   @backend-team
+/infra/ @devops-team
+/docker/ @devops-team
+/.github/workflows/ @devops-team
