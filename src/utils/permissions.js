@@ -39,6 +39,7 @@ export const DEFAULT_PERMISSIONS = {
     'Controle de Acesso',
     'Usuários',
     'Manutenção de perfil',
+    'Sobre o sistema',
   ],
   [ROLES.EDITOR]: [
     'Home',
@@ -59,6 +60,7 @@ export const DEFAULT_PERMISSIONS = {
     'Controle de Acesso',
     'Usuários',
     'Manutenção de perfil',
+    'Sobre o sistema',
   ],
   [ROLES.VIEWER]: [
     'Home',
@@ -73,6 +75,7 @@ export const DEFAULT_PERMISSIONS = {
     'Monitoramento',
     'Controle de Acesso',
     'Usuários',
+    'Sobre o sistema',
   ],
   [ROLES.BLOCKED]: [],
 };
@@ -101,6 +104,7 @@ export const ALL_SYSTEM_MENUS = [
   'Controle de Acesso',
   'Usuários',
   'Manutenção de perfil',
+  'Sobre o sistema',
 ];
 
 /**
@@ -108,6 +112,9 @@ export const ALL_SYSTEM_MENUS = [
  */
 export const checkPermission = (user, itemLabel, profilesList = null) => {
   if (!user || user.status === 'Bloqueado') return false;
+  
+  // Menus globais liberados para qualquer usuário logado ativo
+  if (itemLabel === 'Home' || itemLabel === 'Sobre o sistema') return true;
 
   // Se houver uma lista de perfis dinâmicos, tenta buscar por lá primeiro
   if (profilesList && Array.isArray(profilesList)) {

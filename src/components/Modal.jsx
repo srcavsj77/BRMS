@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
-const Modal = ({ isOpen, onClose, title, children }) => {
+const Modal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-md' }) => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -68,7 +68,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           transform: `translate(${position.x}px, ${position.y}px)`,
           transition: isDragging ? 'none' : 'transform 0.05s ease-out',
         }}
-        className="bg-white rounded-lg shadow-2xl w-full max-w-md mx-4 animate-scale-in select-none overflow-hidden"
+        className={`bg-white rounded-lg shadow-2xl w-full ${maxWidth} mx-4 animate-scale-in select-none overflow-hidden`}
       >
         <div
           onMouseDown={handleMouseDown}
@@ -82,7 +82,9 @@ const Modal = ({ isOpen, onClose, title, children }) => {
             <X size={24} />
           </button>
         </div>
-        <div className="p-6 bg-white">{children}</div>
+        <div className="p-6 bg-white max-h-[calc(95vh-80px)] overflow-y-auto custom-scrollbar">
+          {children}
+        </div>
       </div>
     </div>,
     document.body

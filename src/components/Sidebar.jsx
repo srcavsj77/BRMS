@@ -50,6 +50,7 @@ const menuItems = [
         icon: Shield,
         subItems: [{ label: 'Usuários' }, { label: 'Manutenção de perfil' }],
       },
+      { label: 'Sobre o sistema' },
     ],
   },
 ];

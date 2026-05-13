@@ -9,6 +9,8 @@ import CreateSystem from './pages/CreateSystem';
 import ComplianceDocuments from './pages/ComplianceDocuments';
 import Settings from './pages/Settings';
 import UsersManagement from './pages/UsersManagement';
+import EditSystem from './pages/EditSystem';
+import AboutSystem from './pages/AboutSystem';
 import Login from './components/Login';
 import { calcularNovoStatus } from './utils/regraUtils';
 import { detectarConflitos, verificarExpiracao } from './utils/monitoringService';
@@ -378,7 +380,7 @@ function App() {
       )}
       {currentPage === 'Dashboard' && <AuditReports regras={regras} />}
       {currentPage === 'Cadastrar sistema' && (
-        <CreateSystem onAdd={addSystem} onNavigate={setCurrentPage} currentUser={currentUser} />
+        <CreateSystem systems={systems} onAdd={addSystem} onNavigate={setCurrentPage} currentUser={currentUser} />
       )}
       {currentPage === 'Documentos' && <ComplianceDocuments />}
       {currentPage === 'Monitoramento' && (
@@ -403,6 +405,7 @@ function App() {
           currentUser={currentUser}
         />
       )}
+      {currentPage === 'Sobre o sistema' && <AboutSystem />}
       {currentPage === 'Editar regra' &&
         (editingRule ? (
           <CreateRule
@@ -418,14 +421,25 @@ function App() {
             <h2 className="text-xl text-gray-500">Selecione uma regra na listagem para editar.</h2>
           </div>
         ))}
+      {currentPage === 'Editar sistema' && (
+        <EditSystem
+          systems={systems}
+          regras={regras}
+          onUpdateSystems={setSystems}
+          currentUser={currentUser}
+          onAddAuditEvent={addEventoAuditoria}
+        />
+      )}
       {currentPage !== 'Dashboard' &&
         currentPage !== 'Criar regra' &&
         currentPage !== 'Listar / Editar regras' &&
         currentPage !== 'Editar regra' &&
         currentPage !== 'Alterações realizadas' &&
         currentPage !== 'Cadastrar sistema' &&
+        currentPage !== 'Editar sistema' &&
         currentPage !== 'Documentos' &&
         currentPage !== 'Monitoramento' &&
+        currentPage !== 'Sobre o sistema' &&
         currentPage !== 'Home' && (
           <div className="flex items-center justify-center min-h-[400px]">
             <h2 className="text-xl text-gray-500">Página em desenvolvimento: {currentPage}</h2>

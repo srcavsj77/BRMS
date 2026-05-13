@@ -289,6 +289,7 @@ const UsersManagement = ({ usersList, onUpdateUsers, currentUser, profilesList =
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={selectedUser ? 'Configurar Perfil de Usuário' : 'Cadastrar Novo Integrante'}
+        maxWidth="max-w-xl"
       >
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -359,7 +360,7 @@ const UsersManagement = ({ usersList, onUpdateUsers, currentUser, profilesList =
             <label className="text-sm font-semibold text-gray-700 block mb-2">
               Perfil e Permissões
             </label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 max-h-[150px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
               {profilesList
                 .filter((p) => p.status === 'Ativo')
                 .map((p) => (
@@ -425,18 +426,18 @@ const UsersManagement = ({ usersList, onUpdateUsers, currentUser, profilesList =
             </div>
           </div>
 
-          <div className="pt-6 border-t flex justify-end space-x-3">
+          <div className="pt-8 border-t flex justify-center items-center space-x-4">
             <button
               type="button"
               onClick={() => setIsModalOpen(false)}
-              className="px-6 py-2.5 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-all font-semibold text-sm"
+              className="min-w-[160px] h-[36px] px-6 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-all font-black text-[12px] uppercase tracking-widest leading-none shadow-sm active:scale-95 outline-none"
             >
               {isAdmin ? 'Cancelar' : 'Fechar'}
             </button>
             {isAdmin && (
               <button
                 type="submit"
-                className="px-6 h-[30px] bg-secondary text-white rounded-lg hover:bg-secondary/90 transition-all font-black shadow-md shadow-secondary/20 active:scale-95 text-[12px] uppercase tracking-widest leading-none outline-none"
+                className="min-w-[160px] h-[36px] px-6 bg-secondary text-white rounded-lg hover:bg-secondary-dark transition-all font-black shadow-md shadow-secondary/20 active:scale-95 text-[12px] uppercase tracking-widest leading-none outline-none"
               >
                 {selectedUser ? 'Salvar Perfil' : 'Criar Usuário'}
               </button>
