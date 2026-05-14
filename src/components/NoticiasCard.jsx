@@ -4,10 +4,9 @@ import Card from './Card';
 import Modal from './Modal';
 import Pagination from './Pagination';
 
-const NoticiasCard = ({ onAddEvent }) => {
-  const [notices, setNotices] = useState([]);
+const NoticiasCard = ({ onAddEvent, notices = [], setNotices }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -36,43 +35,7 @@ const NoticiasCard = ({ onAddEvent }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const fetchNotices = async () => {
-    try {
-      const response = await fetch('http://localhost:3333/notices');
-      if (response.ok) {
-        const data = await response.json();
-        setNotices(data);
-      } else {
-        throw new Error('Falha no fetch');
-      }
-    } catch (err) {
-      console.warn('Backend indisponível, usando dados mockados locais.');
-      setNotices([
-        {
-          id: 'mock-1',
-          title: 'Regras de Negócio Atualizadas',
-          description:
-            'As novas regras para o cálculo de impostos de importação já estão ativas na versão 0.1.',
-          dateTime: new Date().toISOString(),
-          responsible: 'Sistema',
-        },
-        {
-          id: 'mock-2',
-          title: 'Manutenção Programada',
-          description:
-            'O ambiente de homologação passará por manutenção técnica às 23:00h de hoje.',
-          dateTime: new Date().toISOString(),
-          responsible: 'Infraestrutura',
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchNotices();
-  }, []);
+  // Os dados são carregados via App.jsx
 
   // Reset page when searching
   useEffect(() => {
@@ -164,15 +127,7 @@ const NoticiasCard = ({ onAddEvent }) => {
         });
       }
 
-      try {
-        fetch(`http://localhost:3333/notices/${currentEditId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedNotice),
-        }).catch(() => console.warn('Atualização persistida localmente.'));
-      } catch (err) {
-        console.error('Erro ao atualizar notícia:', err);
-      }
+      // Sincronização automática via App.jsx
     } else {
       const newNotice = {
         id: Date.now().toString(),
@@ -191,15 +146,7 @@ const NoticiasCard = ({ onAddEvent }) => {
         });
       }
 
-      try {
-        fetch('http://localhost:3333/notices', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newNotice),
-        }).catch(() => console.warn('Inclusão persistida localmente.'));
-      } catch (err) {
-        console.error('Erro ao incluir notícia:', err);
-      }
+      // Sincronização automática via App.jsx
     }
 
     closeModal();
@@ -238,9 +185,7 @@ const NoticiasCard = ({ onAddEvent }) => {
 
     try {
       setNotices((prev) => prev.filter((n) => n.id !== id));
-      fetch(`http://localhost:3333/notices/${id}`, {
-        method: 'DELETE',
-      }).catch(() => console.warn('Exclusão persistida localmente.'));
+      // Sincronização automática via App.jsx
     } catch (err) {
       console.error('Erro ao excluir notícia:', err);
     }

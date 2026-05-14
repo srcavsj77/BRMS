@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { User, Lock, ChevronRight, ShieldCheck, LogIn, XCircle } from 'lucide-react';
+import { apiClient } from '../utils/apiClient';
 
 const Login = ({ onLogin }) => {
   const [publicUsers, setPublicUsers] = useState([]);
@@ -10,8 +11,7 @@ const Login = ({ onLogin }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetch(`http://${window.location.hostname}:3333/api/public/users`)
-      .then((res) => res.json())
+    apiClient.get('/api/public/users', false) // false = no auth needed for suggestions
       .then((data) => {
         if (Array.isArray(data)) setPublicUsers(data);
       })
@@ -42,22 +42,11 @@ const Login = ({ onLogin }) => {
     const username = selectedUser ? selectedUser.name : searchTerm;
 
     try {
-      const response = await fetch(`http://${window.location.hostname}:3333/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        onLogin(data); // data = { user, token }
-      } else {
-        setError(data.error || 'Falha na autenticação.');
-      }
+      const data = await apiClient.post('/api/auth/login', { username, password }, false);
+      onLogin(data); // data = { user, token }
     } catch (err) {
       console.error(err);
-      setError('Erro de conexão com o servidor de autenticação.');
+      setError(err.message || 'Erro de conexão com o servidor de autenticação.');
     }
   };
 

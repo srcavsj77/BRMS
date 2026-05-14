@@ -24,6 +24,7 @@ import { Key, Shield, Check, Info } from 'lucide-react';
 import Modal from './components/Modal';
 
 import ProfileMaintenance from './pages/ProfileMaintenance';
+import { apiClient } from './utils/apiClient';
 
 // Constantes locais removidas (Os dados agora residem e são obtidos do servidor central)
 
@@ -36,6 +37,7 @@ function App() {
   const [systems, setSystems] = useState([]);
   const [profilesList, setProfilesList] = useState([]);
   const [usersList, setUsersList] = useState([]);
+  const [notices, setNotices] = useState([]);
 
   const [isServiceRunning, setIsServiceRunning] = useState(true);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -72,29 +74,22 @@ function App() {
       }
 
       try {
-        const response = await fetch(`http://${window.location.hostname}:3333/api/data`, {
-          headers: {
-            Authorization: `Bearer ${authToken}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setRegras(data.regras || []);
-          setEventosAuditoria(data.eventosAuditoria || []);
-          setSystems(data.systems || []);
-          setProfilesList(data.profilesList || []);
-          setUsersList(data.usersList || []);
-        } else if (response.status === 401 || response.status === 403) {
-          const errData = await response.json().catch(() => ({}));
-          if (errData.error && errData.error.includes('injeção')) {
-            alert(errData.error);
-          } else {
-            handleLogout(); // Token inválido ou expirado
-          }
-        }
+        const data = await apiClient.get('/api/data');
+        setRegras(data.regras || []);
+        setEventosAuditoria(data.eventosAuditoria || []);
+        setSystems(data.systems || []);
+        setProfilesList(data.profilesList || []);
+        setUsersList(data.usersList || []);
+        setNotices(data.notices || []);
       } catch (err) {
         console.error('Erro ao buscar dados do servidor central:', err);
+        if (err.status === 401 || err.status === 403) {
+          if (err.message && err.message.includes('injeção')) {
+            alert(err.message);
+          } else {
+            handleLogout();
+          }
+        }
       } finally {
         setIsLoaded(true);
         setLoading(false);
@@ -109,36 +104,28 @@ function App() {
 
     const saveData = async () => {
       try {
-        const response = await fetch(`http://${window.location.hostname}:3333/api/save`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${authToken}`,
-          },
-          body: JSON.stringify({
-            regras,
-            eventosAuditoria,
-            systems,
-            profilesList,
-            usersList,
-          }),
+        await apiClient.post('/api/save', {
+          regras,
+          eventosAuditoria,
+          systems,
+          profilesList,
+          usersList,
+          notices,
         });
-
-        if (response.status === 401 || response.status === 403) {
-          const errData = await response.json().catch(() => ({}));
-          if (errData.error && errData.error.includes('injeção')) {
-            alert('Erro ao salvar: ' + errData.error);
+      } catch (err) {
+        console.error('Erro ao sincronizar dados com o servidor:', err);
+        if (err.status === 401 || err.status === 403) {
+          if (err.message && err.message.includes('injeção')) {
+            alert('Erro ao salvar: ' + err.message);
           } else {
             handleLogout();
           }
         }
-      } catch (err) {
-        console.error('Erro ao sincronizar dados com o servidor:', err);
       }
     };
 
     saveData();
-  }, [regras, eventosAuditoria, systems, profilesList, usersList, isLoaded, authToken]);
+  }, [regras, eventosAuditoria, systems, profilesList, usersList, notices, isLoaded, authToken]);
 
   const handleLogin = (data) => {
     const { user, token } = data;
@@ -356,7 +343,14 @@ function App() {
       onShowProfile={() => setIsProfileDetailOpen(true)}
     >
       {currentPage === 'Home' && (
-        <Dashboard auditData={eventosAuditoria} onAddAuditEvent={addEventoAuditoria} />
+        <Dashboard
+          auditData={eventosAuditoria}
+          onAddAuditEvent={addEventoAuditoria}
+          systems={systems}
+          setSystems={setSystems}
+          notices={notices}
+          setNotices={setNotices}
+        />
       )}
       {currentPage === 'Criar regra' && (
         <CreateRule

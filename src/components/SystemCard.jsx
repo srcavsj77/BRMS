@@ -4,10 +4,9 @@ import Card from './Card';
 import Modal from './Modal';
 import Pagination from './Pagination';
 
-const SystemCard = ({ onAddEvent }) => {
-  const [systems, setSystems] = useState([]);
+const SystemCard = ({ onAddEvent, systems = [], setSystems }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -37,46 +36,6 @@ const SystemCard = ({ onAddEvent }) => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
-
-  const fetchSystems = async () => {
-    try {
-      const response = await fetch('http://localhost:3333/systems');
-      if (response.ok) {
-        const data = await response.json();
-        setSystems(data);
-      } else {
-        throw new Error('Falha no fetch');
-      }
-    } catch (err) {
-      console.warn('Backend indisponível, usando dados mockados locais para sistemas.');
-      setSystems([
-        {
-          id: 'sys-1',
-          name: 'SGC',
-          description: 'Sistema de Gestão de Candidatos',
-          version: '1.2.0',
-        },
-        {
-          id: 'sys-2',
-          name: 'Financeiro',
-          description: 'Gestão Financeira Central',
-          version: '2.0.5',
-        },
-        {
-          id: 'sys-3',
-          name: 'Portal Aluno',
-          description: 'Interface do Estudante',
-          version: '3.1.0',
-        },
-      ]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSystems();
-  }, []);
 
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -135,15 +94,8 @@ const SystemCard = ({ onAddEvent }) => {
         });
       }
 
-      try {
-        fetch(`http://localhost:3333/systems/${currentEditId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updatedSystem),
-        }).catch(() => console.warn('Atualização persistida localmente.'));
-      } catch (err) {
-        console.error('Erro ao editar sistema:', err);
-      }
+      // O salvamento agora é feito pelo App.jsx ao detectar mudança no estado 'systems'
+      // Não há necessidade de fetch direto aqui.
     } else {
       const newSystem = { ...formData, id: Date.now().toString() };
       setSystems((prev) => [newSystem, ...prev]);
@@ -157,15 +109,7 @@ const SystemCard = ({ onAddEvent }) => {
         });
       }
 
-      try {
-        fetch('http://localhost:3333/systems', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(newSystem),
-        }).catch(() => console.warn('Inclusão persistida localmente.'));
-      } catch (err) {
-        console.error('Erro ao incluir sistema:', err);
-      }
+      // O salvamento agora é feito pelo App.jsx
     }
 
     closeModal();
@@ -194,9 +138,7 @@ const SystemCard = ({ onAddEvent }) => {
 
     try {
       setSystems((prev) => prev.filter((s) => s.id !== id));
-      fetch(`http://localhost:3333/systems/${id}`, {
-        method: 'DELETE',
-      }).catch(() => console.warn('Exclusora persistida localmente.'));
+      // Sincronização automática via App.jsx
     } catch (err) {
       console.error('Erro ao excluir sistema:', err);
     }
