@@ -1,0 +1,40 @@
+/* Material prebuilt theme */
+@import 'node_modules/@angular/material/prebuilt-themes/indigo-pink.css';
+
+:root {
+	--background: #f1f5f9;
+	--sidenav-bg: #f7f9fc;
+	--content-padding: 24px;
+	--sidenav-width: 220px;
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	font-family: Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+	background: var(--background);
+	color: #111827;
+}
+
+/* Layout from protótipo */
+.sidenav-container { height: 100vh; }
+.sidenav { width: var(--sidenav-width); padding: 16px; background: var(--sidenav-bg); }
+.logo { margin: 0 0 12px 8px; font-weight: 600; }
+.content { padding: var(--content-padding); background: var(--background); min-height: calc(100vh - 64px); }
+.active { font-weight: 600; }
+
+/* Dashboard / cards */
+.grid { display: flex; gap: 16px; flex-wrap: wrap; }
+.card { flex: 1 1 300px; }
+
+/* Rules list */
+.cols-2 mat-list-item { display: inline-block; width: 48%; margin: 1%; }
+.cols-1 mat-list-item { display: block; width: 100%; }
+.secondary { color: rgba(0,0,0,0.6); font-size: 0.9em; }
+
+/* Small utilities */
+.text-muted { color: rgba(0,0,0,0.6); }
+

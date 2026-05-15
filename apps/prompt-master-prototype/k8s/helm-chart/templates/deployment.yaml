@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "prompt-master.fullname" . }}
+  labels:
+    app: {{ include "prompt-master.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "prompt-master.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "prompt-master.name" . }}
+    spec:
+      containers:
+        - name: prompt-master
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 3001

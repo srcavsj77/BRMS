@@ -1,0 +1,16 @@
+id,area,action,expected_result,priority
+F1,Autenticação,Realizar "Login mock" no header; preencher nome e papel,Botão mostra usuário e papéis autorizados habilitados,High
+F2,Carregamento,Abrir a raiz do protótipo; verificar render do Markdown,Conteúdo de docs/DOCUMENTO_TECNICO_FUNCIONAL_PROMPT_MASTER.md renderizado,High
+F3,Edição e Salvamento,Editar no editor e clicar 'Salvar no servidor',Resposta 200 OK e arquivo docs/DOCUMENTO_TECNICO_FUNCIONAL_PROMPT_MASTER.md atualizado,High
+E1,Exportação MD,Click 'Download MD',Arquivo .md baixado com conteúdo idêntico,Medium
+E2,Exportação DOCX server,Click 'Exportar DOCX' (com pandoc),Resposta content-type docx e arquivo baixado,High
+E3,Exportação PDF server,Click 'Exportar PDF' (com pandoc + engine),PDF válido baixado,High
+E4,Exportação client,Click 'Imprimir',Diálogo de impressão aberto; PDF via browser,Low
+I1,API Save,POST /api/save com md,Retorno 200 e arquivo atualizado,High
+I2,API Export,POST /api/export com {md,metadata,format},Retorno stream de arquivo ou erro legível se pandoc ausente,High
+Q1,Validação,Gerar documento sem campos obrigatórios,Geração bloqueada com mensagem de erro conforme R1,High
+Q2,Trace ID,Verificar requisitos com trace_id,Cada requisito possui trace_id unico,Medium
+V1,Versionamento,Salvar múltiplas versões,Histórico preservado e acessível,Medium
+S1,Segurança,Chamar /api/export sem autenticação mock (UI),Botão desabilitado; em produção exigir OIDC,High
+UX1,Tema,Alternar tema claro/escuro,Cores aplicadas corretamente e leitura mantida,Low
+OPS1,Deploy K8s,Aplicar manifests em cluster,pods Running e readiness/liveness OK,High

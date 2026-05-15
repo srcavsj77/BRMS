@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prompt-master
+  labels:
+    app: prompt-master
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: prompt-master
+  template:
+    metadata:
+      labels:
+        app: prompt-master
+    spec:
+      containers:
+        - name: prompt-master
+          image: registry.example.com/prompt-master-prototype:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3001
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: OIDC_ISSUER
+              valueFrom:
+                secretKeyRef:
+                  name: prompt-master-secrets
+                  key: oidc_issuer
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: prompt-master-secrets
+                  key: oidc_client_id
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3001
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /_next/static
+              port: 3001
+            initialDelaySeconds: 30
+            periodSeconds: 30
+---
+# Secret example (do not store secrets in plain YAML in production)
+apiVersion: v1
+kind: Secret
+metadata:
+  name: prompt-master-secrets
+type: Opaque
+stringData:
+  oidc_issuer: "https://idp.corp.example"
+  oidc_client_id: "prompt-master-client"
+  oidc_client_secret: "REPLACE_ME"

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: prompt-master
+description: Helm chart skeleton for Prompt Master prototype
+type: application
+version: 0.1.0
+appVersion: "1.0"

@@ -1,0 +1,27 @@
+:root{
+  --bg: #ffffff;
+  --fg: #111827;
+  --muted: #6b7280;
+  --accent: #2563eb;
+}
+
+.dark{
+  --bg: #0b1220;
+  --fg: #e6eef8;
+  --muted: #94a3b8;
+  --accent: #60a5fa;
+}
+
+body{
+  margin:0; font-family: Inter, Arial, sans-serif; background:var(--bg); color:var(--fg);
+}
+
+.container{ padding:24px; max-width:1200px; margin:0 auto }
+.header{ display:flex; justify-content:space-between; align-items:center }
+.btn{ background:var(--accent); color:white; border:0; padding:8px 12px; border-radius:6px; cursor:pointer }
+.muted{ color:var(--muted) }
+
+.layout{ display:flex; gap:20px }
+.aside{ width:320px; }
+.editor{ width:100%; min-height:320px; font-family: monospace; padding:12px; border-radius:6px; border:1px solid #ddd; background:rgba(0,0,0,0.02); color:var(--fg) }
+.toolbar{ display:flex; gap:8px }

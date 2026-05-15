@@ -1,0 +1,56 @@
+{
+  "info": {
+    "name": "PROMPT_MASTER - Prototype",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "version": "1.0.0"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001" }
+  ],
+  "item": [
+    {
+      "name": "Get Document (rendered MD)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{baseUrl}}/api/doc", "host": ["{{baseUrl}}"], "path": ["api","doc"] }
+      }
+    },
+    {
+      "name": "Save Document (api/save)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"md\": \"# Exemplo\n\nConteúdo de teste\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/save", "host": ["{{baseUrl}}"], "path": ["api","save"] }
+      }
+    },
+    {
+      "name": "Export DOCX (api/export)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"md\": \"# Título\n\nTeste de export DOCX\",\n  \"metadata\": { \"title\": \"Teste\", \"author\": \"QA\", \"version\": \"1.0\" },\n  \"format\": \"docx\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/export", "host": ["{{baseUrl}}"], "path": ["api","export"] }
+      }
+    },
+    {
+      "name": "Export PDF (api/export)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"md\": \"# Título\n\nTeste de export PDF\",\n  \"metadata\": { \"title\": \"Teste\", \"author\": \"QA\", \"version\": \"1.0\" },\n  \"format\": \"pdf\"\n}"
+        },
+        "url": { "raw": "{{baseUrl}}/api/export", "host": ["{{baseUrl}}"], "path": ["api","export"] }
+      }
+    }
+  ]
+}
