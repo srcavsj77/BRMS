@@ -361,7 +361,7 @@ function App() {
         />
       )}
       {currentPage === 'Listar / Editar regras' && (
-        <ListRules regras={regras} onEdit={handleEditRule} currentUser={currentUser} />
+        <ListRules regras={regras} systems={systems} onEdit={handleEditRule} currentUser={currentUser} />
       )}
       {currentPage === 'Alterações realizadas' && (
         <AuditChanges

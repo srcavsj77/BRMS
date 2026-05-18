@@ -13,7 +13,7 @@ import {
 import { sanitizeSQL } from '../utils/security';
 import { checkPermission } from '../utils/permissions';
 
-const ListRules = ({ onEdit, regras = [], currentUser }) => {
+const ListRules = ({ onEdit, regras = [], systems = [], currentUser }) => {
   const [displayResults, setDisplayResults] = useState(regras);
 
   const canEdit = checkPermission(currentUser, 'Editar regra');
@@ -28,6 +28,7 @@ const ListRules = ({ onEdit, regras = [], currentUser }) => {
     vigencia_inicio: '',
     vigencia_fim: '',
     status: '',
+    sistema: '',
   });
 
   const [currentPage, setCurrentPage] = useState(1);
@@ -118,8 +119,9 @@ const ListRules = ({ onEdit, regras = [], currentUser }) => {
       const matchStart = !start || (itemDate && itemDate >= start);
       const matchEnd = !end || (itemDate && itemDate <= end);
       const matchStatus = !filters.status || item.status === filters.status;
+      const matchSistema = !filters.sistema || item.sistema === filters.sistema;
 
-      return matchId && matchNome && matchStart && matchEnd && matchStatus;
+      return matchId && matchNome && matchStart && matchEnd && matchStatus && matchSistema;
     });
 
     setDisplayResults(filtered);
@@ -133,6 +135,7 @@ const ListRules = ({ onEdit, regras = [], currentUser }) => {
       vigencia_inicio: '',
       vigencia_fim: '',
       status: '',
+      sistema: '',
     });
     setDisplayResults(regras);
     setCurrentPage(1);
@@ -243,7 +246,7 @@ const ListRules = ({ onEdit, regras = [], currentUser }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-end text-sm">
             <div className="md:col-span-2 space-y-2">
               <label className="text-sm font-bold text-text-title">Vigência (Período):</label>
               <div className="flex items-center space-x-2">
@@ -263,6 +266,21 @@ const ListRules = ({ onEdit, regras = [], currentUser }) => {
                   className="flex-1 border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600"
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-bold text-text-title">Sistema:</label>
+              <select
+                name="sistema"
+                value={filters.sistema || ''}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600 bg-white"
+              >
+                <option value="">Todos</option>
+                {systems.map((sys, idx) => (
+                  <option key={idx} value={sys.nome}>{sys.nome}</option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">
