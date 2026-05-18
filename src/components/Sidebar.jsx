@@ -30,7 +30,7 @@ const menuItems = [
     icon: Database,
     label: 'Sistemas',
     hasDropdown: true,
-    subItems: [{ label: 'Cadastrar sistema' }, { label: 'Editar sistema' }],
+    subItems: [{ label: 'Cadastrar' }, { label: 'Associar Módulos' }, { label: 'Listar / Editar' }],
   },
   {
     icon: ShieldCheck,
@@ -44,12 +44,8 @@ const menuItems = [
     hasDropdown: true,
     subItems: [
       { label: 'Monitoramento' },
-      {
-        label: 'Controle de Acesso',
-        hasDropdown: true,
-        icon: Shield,
-        subItems: [{ label: 'Usuários' }, { label: 'Manutenção de perfil' }],
-      },
+      { label: 'Usuários' },
+      { label: 'Manutenção de perfil' },
       { label: 'Sobre o sistema' },
     ],
   },

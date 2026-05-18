@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Database, Search, Edit2, Trash2, X, Save, AlertCircle, CheckCircle } from 'lucide-react';
+import { Database, Search, Edit2, Trash2, X, Save, AlertCircle, CheckCircle, Layers } from 'lucide-react';
 import { checkPermission } from '../utils/permissions';
 import Modal from '../components/Modal';
 
@@ -9,6 +9,8 @@ const EditSystem = ({
   onUpdateSystems,
   currentUser,
   onAddAuditEvent,
+  onNavigate,
+  onSelectSystemForModules,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingSystem, setEditingSystem] = useState(null);
@@ -95,7 +97,6 @@ const EditSystem = ({
           nome: editingSystem.nome,
           descricao: editingSystem.descricao,
           versao: editingSystem.versao,
-          modulos: editingSystem.modulos,
           status: editingSystem.status || 'Ativo'
         };
       }
@@ -159,7 +160,8 @@ const EditSystem = ({
               <th className="p-4 font-bold">Descrição</th>
               <th className="p-4 font-bold">Status</th>
               <th className="p-4 font-bold text-center">Regras Associadas</th>
-              <th className="p-4 font-bold text-right">Ações</th>
+              <th className="p-4 font-bold text-center">Módulos</th>
+              <th className="p-4 font-bold text-center">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -197,8 +199,25 @@ const EditSystem = ({
                         {totalRules}
                       </span>
                     </td>
-                    <td className="p-4 text-right">
-                      <div className="flex items-center justify-end space-x-2">
+                    <td className="p-4 text-center">
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                        (sys.modulos && sys.modulos.split(',').filter(m => m.trim()).length > 0) ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-500'
+                      }`}>
+                        {sys.modulos ? sys.modulos.split(',').filter(m => m.trim()).length : 0}
+                      </span>
+                    </td>
+                    <td className="p-4 text-center">
+                      <div className="flex items-center justify-center space-x-2">
+                        <button
+                          onClick={() => {
+                            if(onSelectSystemForModules) onSelectSystemForModules(sys.nome);
+                            if(onNavigate) onNavigate('Associar Módulos');
+                          }}
+                          className={`p-2 rounded-lg transition-colors text-gray-400 hover:text-indigo-500 hover:bg-indigo-50`}
+                          title="Gerenciar Módulos"
+                        >
+                          <Layers size={18} />
+                        </button>
                         <button
                           onClick={() => handleEditClick(sys)}
                           disabled={!canEditDelete}
@@ -273,15 +292,7 @@ const EditSystem = ({
                 <option value="Em analise">Em análise</option>
               </select>
             </div>
-            <div>
-              <label className="block text-sm font-bold text-gray-700 mb-1">Módulos</label>
-              <textarea
-                rows="2"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-secondary/20 focus:border-secondary outline-none transition-all resize-none"
-                value={editingSystem.modulos}
-                onChange={(e) => setEditingSystem({ ...editingSystem, modulos: e.target.value })}
-              />
-            </div>
+
             <div className="flex justify-end space-x-3 pt-4 border-t border-gray-100 mt-6">
               <button
                 type="button"

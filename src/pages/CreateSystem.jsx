@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Save, X, Database, Info, Layers, AppWindow, FileText, Lock, AlertCircle } from 'lucide-react';
+import { Save, X, Database, Info, AppWindow, FileText, Lock, AlertCircle } from 'lucide-react';
 import { checkPermission } from '../utils/permissions';
 
 const CreateSystem = ({ systems = [], onAdd, onNavigate, currentUser }) => {
@@ -7,7 +7,6 @@ const CreateSystem = ({ systems = [], onAdd, onNavigate, currentUser }) => {
     nome: '',
     descricao: '',
     versao: '1.0.0',
-    modulos: '',
     status: 'Ativo',
   });
   const [showError, setShowError] = useState('');
@@ -36,7 +35,7 @@ const CreateSystem = ({ systems = [], onAdd, onNavigate, currentUser }) => {
     }
 
     onAdd({ ...formData, nome: formData.nome.trim() });
-    onNavigate('Editar sistema');
+    onNavigate('Listar / Editar');
   };
 
   return (
@@ -163,25 +162,6 @@ const CreateSystem = ({ systems = [], onAdd, onNavigate, currentUser }) => {
             />
           </div>
 
-          <div className="md:col-span-2 space-y-2">
-            <label className="text-sm font-bold text-text-title flex items-center">
-              <Layers size={16} className="mr-2 text-primary" />
-              Módulos do Sistema
-            </label>
-            <textarea
-              name="modulos"
-              value={formData.modulos}
-              onChange={handleChange}
-              disabled={!canSave}
-              rows="3"
-              placeholder="Ex: Financeiro, Secretaria, Diploma Digital (separados por vírgula)..."
-              className={`w-full border rounded-lg p-3 text-sm outline-none transition-all ${
-                canSave
-                  ? 'border-gray-300 focus:ring-2 focus:ring-secondary/20 hover:border-gray-400'
-                  : 'border-gray-200 bg-gray-50/50 text-gray-400 cursor-not-allowed'
-              }`}
-            />
-          </div>
         </div>
 
         <div className="p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-start space-x-3">

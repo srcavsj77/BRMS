@@ -30,6 +30,7 @@ export const useFormularioRegra = (dadosIniciais, ehEdicao, sistemas = []) => {
     nome: '',
     descricao_funcional: '',
     categoria: '',
+    criticidade: 'A Definir',
     expressao_logica: '',
     versao: '1.0.0',
     status: 'Ativo',
@@ -87,7 +88,8 @@ export const useFormularioRegra = (dadosIniciais, ehEdicao, sistemas = []) => {
         id: dados.id_regra || '',
         nome: dados.nome || '',
         descricao_funcional: dados.descricao || '',
-        categoria: dados.sistema || '', // Mapeado para sistema no protótipo
+        categoria: dados.categoria || '',
+        criticidade: dados.criticidade || 'A Definir',
         expressao_logica: dados.expressao || '/* Carregando lógica... */',
         versao: dados.versao || '1.0.0',
         status: dados.status || 'Rascunho',

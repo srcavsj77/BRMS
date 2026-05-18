@@ -6,6 +6,7 @@ import ListRules from './pages/ListRules';
 import AuditChanges from './pages/AuditChanges';
 import AuditReports from './pages/AuditReports';
 import CreateSystem from './pages/CreateSystem';
+import AssociateModules from './pages/AssociateModules';
 import ComplianceDocuments from './pages/ComplianceDocuments';
 import Settings from './pages/Settings';
 import UsersManagement from './pages/UsersManagement';
@@ -44,6 +45,7 @@ function App() {
   const [newPassword, setNewPassword] = useState('');
   const [isProfileDetailOpen, setIsProfileDetailOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [selectedSystemForModules, setSelectedSystemForModules] = useState('');
 
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('brms_session');
@@ -75,7 +77,19 @@ function App() {
 
       try {
         const data = await apiClient.get('/api/data');
-        setRegras(data.regras || []);
+        
+        // Retro-compatibilidade: Adicionar categoria às regras antigas (mocks) que não possuíam
+        const regrasProcessadas = (data.regras || []).map(regra => {
+          if (!regra.categoria && regra.sistema) {
+            const system = (data.systems || []).find(s => s.nome === regra.sistema);
+            if (system && system.modulos) {
+              regra.categoria = system.modulos.split(',')[0].trim();
+            }
+          }
+          return regra;
+        });
+
+        setRegras(regrasProcessadas);
         setEventosAuditoria(data.eventosAuditoria || []);
         setSystems(data.systems || []);
         setProfilesList(data.profilesList || []);
@@ -179,6 +193,7 @@ function App() {
       versao: novaRegra.versao,
       descricao: novaRegra.descricao_funcional,
       sistema: novaRegra.sistema_associado,
+      categoria: novaRegra.categoria,
       usuario: currentUser.name,
       criacao: novaRegra.data_criacao,
       modificacao: isEdit
@@ -358,6 +373,7 @@ function App() {
           systems={systems}
           currentUser={currentUser}
           onSave={handleSaveRule}
+          onNavigate={setCurrentPage}
         />
       )}
       {currentPage === 'Listar / Editar regras' && (
@@ -373,8 +389,18 @@ function App() {
         />
       )}
       {currentPage === 'Dashboard' && <AuditReports regras={regras} />}
-      {currentPage === 'Cadastrar sistema' && (
+      {currentPage === 'Cadastrar' && (
         <CreateSystem systems={systems} onAdd={addSystem} onNavigate={setCurrentPage} currentUser={currentUser} />
+      )}
+      {currentPage === 'Associar Módulos' && (
+        <AssociateModules 
+          systems={systems} 
+          regras={regras}
+          onUpdateSystems={setSystems} 
+          currentUser={currentUser} 
+          onAddAuditEvent={addEventoAuditoria} 
+          initialSystem={selectedSystemForModules}
+        />
       )}
       {currentPage === 'Documentos' && <ComplianceDocuments />}
       {currentPage === 'Monitoramento' && (
@@ -409,19 +435,22 @@ function App() {
             systems={systems}
             currentUser={currentUser}
             onSave={handleSaveRule}
+            onNavigate={setCurrentPage}
           />
         ) : (
           <div className="flex items-center justify-center min-h-[400px]">
             <h2 className="text-xl text-gray-500">Selecione uma regra na listagem para editar.</h2>
           </div>
         ))}
-      {currentPage === 'Editar sistema' && (
+      {currentPage === 'Listar / Editar' && (
         <EditSystem
           systems={systems}
           regras={regras}
           onUpdateSystems={setSystems}
           currentUser={currentUser}
           onAddAuditEvent={addEventoAuditoria}
+          onNavigate={setCurrentPage}
+          onSelectSystemForModules={setSelectedSystemForModules}
         />
       )}
       {currentPage !== 'Dashboard' &&
@@ -429,8 +458,9 @@ function App() {
         currentPage !== 'Listar / Editar regras' &&
         currentPage !== 'Editar regra' &&
         currentPage !== 'Alterações realizadas' &&
-        currentPage !== 'Cadastrar sistema' &&
-        currentPage !== 'Editar sistema' &&
+        currentPage !== 'Cadastrar' &&
+        currentPage !== 'Listar / Editar' &&
+        currentPage !== 'Associar Módulos' &&
         currentPage !== 'Documentos' &&
         currentPage !== 'Monitoramento' &&
         currentPage !== 'Sobre o sistema' &&

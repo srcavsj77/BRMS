@@ -1,10 +1,18 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Tag, Info } from 'lucide-react';
 
 /**
  * Seção de identificação básica da regra.
  */
 const SecaoIdentificacao = ({ dados, categorias, sistemas, aoMudar }) => {
+
+  const modulosDisponiveis = useMemo(() => {
+    if (!dados.sistema_associado) return [];
+    const sys = sistemas.find(s => s.nome === dados.sistema_associado);
+    if (!sys || !sys.modulos) return [];
+    return sys.modulos.split(',').map(m => m.trim()).filter(Boolean);
+  }, [dados.sistema_associado, sistemas]);
+
   return (
     <section>
       <div className="flex items-center space-x-2 mb-4 text-primary">
@@ -33,31 +41,8 @@ const SecaoIdentificacao = ({ dados, categorias, sistemas, aoMudar }) => {
             className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 focus:border-secondary outline-none transition-all"
           />
         </div>
-        <div className="md:col-span-2 space-y-2">
-          <label className="text-sm font-bold text-text-title">Categoria</label>
-          <select
-            name="categoria"
-            value={dados.categoria}
-            onChange={aoMudar}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
-          >
-            <option value="">Selecione uma categoria...</option>
-            {categorias.map((categoria, index) => (
-              <option key={index} value={categoria}>
-                {categoria}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="space-y-2">
-          <label className="text-sm font-bold text-text-title">Versão</label>
-          <input
-            name="versao"
-            value={dados.versao}
-            onChange={aoMudar}
-            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
-          />
-        </div>
+
+        {/* SWAPPED: Sistema Associado is now first */}
         <div className="md:col-span-2 space-y-2">
           <label className="text-sm font-bold text-text-title">Sistema associado à regra</label>
           <select
@@ -74,6 +59,43 @@ const SecaoIdentificacao = ({ dados, categorias, sistemas, aoMudar }) => {
             ))}
           </select>
         </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-text-title">Versão</label>
+          <input
+            name="versao"
+            value={dados.versao}
+            onChange={aoMudar}
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
+          />
+        </div>
+
+        {/* SWAPPED: Módulo do Sistema (formerly Categoria) is now second, dependent on Sistema */}
+        <div className="md:col-span-2 space-y-2">
+          <label className="text-sm font-bold text-text-title">Módulo do Sistema</label>
+          <select
+            name="categoria"
+            value={dados.categoria}
+            onChange={aoMudar}
+            disabled={!dados.sistema_associado}
+            className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all ${dados.sistema_associado
+                ? 'border-gray-300 focus:ring-2 focus:ring-secondary/20 bg-white'
+                : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+          >
+            <option value="">
+              {!dados.sistema_associado
+                ? 'Selecione o sistema primeiro...'
+                : 'Selecione um módulo...'}
+            </option>
+            {modulosDisponiveis.map((modulo, index) => (
+              <option key={index} value={modulo}>
+                {modulo}
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="space-y-2">
           <label className="text-sm font-bold text-text-title">Onde Estou:</label>
           <input
@@ -85,6 +107,22 @@ const SecaoIdentificacao = ({ dados, categorias, sistemas, aoMudar }) => {
             placeholder="Ex: Módulo de Autenticação / Tela de Login"
             className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
           />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-text-title">Grau de Criticidade *</label>
+          <select
+            name="criticidade"
+            value={dados.criticidade}
+            onChange={aoMudar}
+            className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
+          >
+            <option value="A Definir">A Definir</option>
+            <option value="Crítica">Crítica</option>
+            <option value="Alta">Alta</option>
+            <option value="Média">Média</option>
+            <option value="Baixa">Baixa</option>
+          </select>
         </div>
       </div>
     </section>

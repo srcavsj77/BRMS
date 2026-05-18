@@ -80,12 +80,12 @@ const TabVersionamento = () => (
   <div className="animate-fade-in">
     <SectionTitle icon={GitBranch} title="Versionamento" description="Controle de versões, builds e histórico de lançamentos." />
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <DataBox label="Versão Atual" value="v2.4.0-enterprise" icon={Code} />
-      <DataBox label="Build" value="#2026.05.12-4" icon={Terminal} />
+      <DataBox label="Versão Atual" value="v2.5.0-enterprise" icon={Code} />
+      <DataBox label="Build" value="#2026.05.18-1" icon={Terminal} />
       <DataBox label="Branch Principal" value="main" icon={GitBranch} />
       <DataBox label="Pipeline Atual" value="brms-ci-cd-prod" icon={Workflow} />
       <DataBox label="Commit Hash" value="52b173d" icon={Hash} />
-      <DataBox label="Último Deploy" value="Hoje, às 10:45" icon={Clock} />
+      <DataBox label="Último Deploy" value="Hoje, às 16:50" icon={Clock} />
       <DataBox label="Estratégia Release" value="Blue/Green" icon={Layers} />
       <DataBox label="Status Build" value="Success" icon={CheckCircle} statusColor="green" />
     </div>
@@ -230,6 +230,10 @@ const TabHistorico = () => (
     <SectionTitle icon={History} title="Histórico do Sistema" description="Linha do tempo de marcos e evoluções." />
     <div className="space-y-4">
       <div className="border-l-2 border-secondary pl-4 pb-4">
+        <h4 className="font-bold text-sm text-gray-800">Maio 2026 (v2.5.0) - Governança e Usabilidade</h4>
+        <p className="text-xs text-gray-500 mt-1">Evolução do Stepper (navegação direta, indicador de completitude amarelo/azul), melhoria nos filtros hierárquicos, cancelamento unificado e exportações (PDF/Excel com cabeçalhos).</p>
+      </div>
+      <div className="border-l-2 border-gray-200 pl-4 pb-4">
         <h4 className="font-bold text-sm text-gray-800">Maio 2026 - Modernização Enterprise</h4>
         <p className="text-xs text-gray-500 mt-1">Implementação de CI/CD, DevSecOps, Observabilidade e Componentização Avançada.</p>
       </div>

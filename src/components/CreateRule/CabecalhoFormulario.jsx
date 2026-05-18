@@ -39,27 +39,6 @@ const CabecalhoFormulario = ({ ehEdicao, aoSalvar, aoCancelar, aoAtualizar, curr
             <RefreshCw size={16} className="mr-2" /> Atualizar
           </button>
         )}
-        <button
-          onClick={aoCancelar}
-          type="button"
-          className="flex items-center px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-        >
-          <X size={16} className="mr-2" /> Cancelar
-        </button>
-        <button
-          onClick={() => canSave && aoSalvar()}
-          disabled={!canSave}
-          type="button"
-          className={`flex items-center px-6 py-2 text-sm font-bold rounded-lg transition-all shadow-lg ${
-            canSave
-              ? 'bg-secondary text-white hover:bg-secondary/90 shadow-secondary/20'
-              : 'bg-gray-100 text-gray-400 border border-gray-200 shadow-none cursor-not-allowed'
-          }`}
-          title={!canSave ? 'Você não possui permissão para salvar alterações.' : ''}
-        >
-          {canSave ? <Save size={16} className="mr-2" /> : <Lock size={16} className="mr-2" />}
-          Salvar Regra
-        </button>
       </div>
     </div>
   );
