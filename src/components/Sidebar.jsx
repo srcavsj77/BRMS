@@ -37,6 +37,7 @@ const menuItems = [
   {
     icon: ShieldCheck,
     label: 'Conformidade',
+    displayLabel: 'Acervo documental',
     hasDropdown: true,
     subItems: [{ label: 'Documentos' }],
   },
