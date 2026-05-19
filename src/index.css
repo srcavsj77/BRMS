@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    zoom: 90%;
+  }
   body {
     @apply font-sans bg-white text-[#444444];
   }
