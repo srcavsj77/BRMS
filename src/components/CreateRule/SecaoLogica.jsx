@@ -13,7 +13,7 @@ const SecaoLogica = ({ dados, aoMudar }) => {
       </div>
       <div className="space-y-6">
         <div className="space-y-2">
-          <label className="text-sm font-bold text-text-title">Descrição Funcional</label>
+          <label className="text-sm font-bold text-text-title">Descrição Funcional *</label>
           <textarea
             name="descricao_funcional"
             value={dados.descricao_funcional}

@@ -44,7 +44,7 @@ const SecaoIdentificacao = ({ dados, categorias, sistemas, aoMudar }) => {
 
         {/* SWAPPED: Sistema Associado is now first */}
         <div className="md:col-span-2 space-y-2">
-          <label className="text-sm font-bold text-text-title">Sistema associado à regra</label>
+          <label className="text-sm font-bold text-text-title">Sistema associado à regra *</label>
           <select
             name="sistema_associado"
             value={dados.sistema_associado}
@@ -72,7 +72,7 @@ const SecaoIdentificacao = ({ dados, categorias, sistemas, aoMudar }) => {
 
         {/* SWAPPED: Módulo do Sistema (formerly Categoria) is now second, dependent on Sistema */}
         <div className="md:col-span-2 space-y-2">
-          <label className="text-sm font-bold text-text-title">Módulo do Sistema</label>
+          <label className="text-sm font-bold text-text-title">Módulo do Sistema *</label>
           <select
             name="categoria"
             value={dados.categoria}

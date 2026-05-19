@@ -69,12 +69,17 @@ const CreateRuleForm = ({
   };
 
   const handleSalvar = () => {
-    const nomeNormalizado = dadosFormulario.nome.trim().toLowerCase();
+    const nome = dadosFormulario.nome?.trim();
+    const sistema = dadosFormulario.sistema_associado;
+    const modulo = dadosFormulario.categoria;
+    const descricao = dadosFormulario.descricao_funcional?.trim();
 
-    if (!nomeNormalizado) {
-      setShowError('Por favor, informe um nome para a regra.');
+    if (!nome || !sistema || !modulo || !descricao) {
+      alert('Um ou mais itens encontram-se sem preenchimento.');
       return;
     }
+
+    const nomeNormalizado = nome.toLowerCase();
 
     const isDuplicate = regras.some(
       (r) => r.nome.trim().toLowerCase() === nomeNormalizado && r.id_regra !== dadosFormulario.id_regra
@@ -123,7 +128,7 @@ const CreateRuleForm = ({
   const isStepComplete = (id) => {
     switch (id) {
       case 1:
-        return !!(dadosFormulario.nome?.trim() && dadosFormulario.sistema_associado);
+        return !!(dadosFormulario.nome?.trim() && dadosFormulario.sistema_associado && dadosFormulario.categoria);
       case 2:
         return !!dadosFormulario.descricao_funcional?.trim();
       case 3:
