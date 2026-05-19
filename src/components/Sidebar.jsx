@@ -18,7 +18,7 @@ const menuItems = [
     icon: FilePlus,
     label: 'Regras de Negócio',
     hasDropdown: true,
-    subItems: [{ label: 'Criar regra' }, { label: 'Listar / Editar regras' }],
+    subItems: [{ label: 'Criar regra', displayLabel: 'Nova Regra de Negócio' }, { label: 'Listar / Editar regras' }],
   },
   {
     icon: ClipboardCheck,
@@ -79,7 +79,7 @@ const Sidebar = ({ onNavigate, activeItem, width, currentUser, profilesList }) =
           }}
           className={`w-full text-left pl-[53px] py-[10px] text-[14px] hover:text-white hover:bg-secondary/30 transition-all flex items-center justify-between pr-4 ${activeItem === sub.label ? 'text-white font-bold bg-secondary/20' : 'text-white/60'}`}
         >
-          <span>{sub.label}</span>
+          <span>{sub.displayLabel || sub.label}</span>
           {sub.hasDropdown &&
             (isExpanded ? (
               <ChevronDown size={14} />
