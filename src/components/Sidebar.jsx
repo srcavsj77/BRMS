@@ -23,6 +23,7 @@ const menuItems = [
   {
     icon: ClipboardCheck,
     label: 'Auditoria',
+    displayLabel: 'Auditoria de regras',
     hasDropdown: true,
     subItems: [{ label: 'Alterações realizadas' }, { label: 'Dashboard' }],
   },
