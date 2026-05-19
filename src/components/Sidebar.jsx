@@ -29,6 +29,7 @@ const menuItems = [
   {
     icon: Database,
     label: 'Sistemas',
+    displayLabel: 'Sistemas FGV',
     hasDropdown: true,
     subItems: [{ label: 'Cadastrar' }, { label: 'Associar Módulos' }, { label: 'Listar / Editar' }],
   },
@@ -132,7 +133,7 @@ const Sidebar = ({ onNavigate, activeItem, width, currentUser, profilesList }) =
                   className={`w-full flex items-center px-[20px] py-[15px] hover:bg-secondary transition-colors duration-200 group ${activeItem === item.label ? 'bg-secondary/50 font-semibold text-white' : 'text-white/70'}`}
                 >
                   <item.icon size={20} className="mr-3" />
-                  <span className="flex-1 text-left text-[15px]">{item.label}</span>
+                  <span className="flex-1 text-left text-[15px]">{item.displayLabel || item.label}</span>
                   {item.hasDropdown &&
                     (isExpanded ? (
                       <ChevronDown size={16} />
