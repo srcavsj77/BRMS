@@ -240,6 +240,22 @@ const CreateRuleForm = ({
                 <button
                   type="button"
                   onClick={() => {
+                    if (currentStep === 1) {
+                      const nome = dadosFormulario.nome?.trim();
+                      const sistema = dadosFormulario.sistema_associado;
+                      const modulo = dadosFormulario.categoria;
+                      if (!nome || !sistema || !modulo) {
+                        alert('Um ou mais itens encontram-se sem preenchimento.');
+                        return;
+                      }
+                    } else if (currentStep === 2) {
+                      const descricao = dadosFormulario.descricao_funcional?.trim();
+                      if (!descricao) {
+                        alert('Um ou mais itens encontram-se sem preenchimento.');
+                        return;
+                      }
+                    }
+
                     const nextStep = Math.min(steps.length, currentStep + 1);
                     setCurrentStep(nextStep);
                     setHighestStep(prev => Math.max(prev, nextStep));
