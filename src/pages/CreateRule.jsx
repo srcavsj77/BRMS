@@ -75,7 +75,7 @@ const CreateRuleForm = ({
     const descricao = dadosFormulario.descricao_funcional?.trim();
 
     if (!nome || !sistema || !modulo || !descricao) {
-      alert('Um ou mais itens encontram-se sem preenchimento.');
+      setShowError('Um ou mais itens encontram-se sem preenchimento.');
       return;
     }
 
@@ -245,13 +245,13 @@ const CreateRuleForm = ({
                       const sistema = dadosFormulario.sistema_associado;
                       const modulo = dadosFormulario.categoria;
                       if (!nome || !sistema || !modulo) {
-                        alert('Um ou mais itens encontram-se sem preenchimento.');
+                        setShowError('Um ou mais itens encontram-se sem preenchimento.');
                         return;
                       }
                     } else if (currentStep === 2) {
                       const descricao = dadosFormulario.descricao_funcional?.trim();
                       if (!descricao) {
-                        alert('Um ou mais itens encontram-se sem preenchimento.');
+                        setShowError('Um ou mais itens encontram-se sem preenchimento.');
                         return;
                       }
                     }
