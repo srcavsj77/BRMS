@@ -18,7 +18,7 @@ const menuItems = [
     icon: FilePlus,
     label: 'Regras de Negócio',
     hasDropdown: true,
-    subItems: [{ label: 'Listar / Editar regras' }, { label: 'Criar regra' }],
+    subItems: [{ label: 'Criar regra' }, { label: 'Listar / Editar regras' }],
   },
   {
     icon: ClipboardCheck,
