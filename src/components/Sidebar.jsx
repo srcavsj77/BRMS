@@ -15,19 +15,6 @@ import { checkPermission } from '../utils/permissions';
 const menuItems = [
   { icon: Home, label: 'Home', hasDropdown: false },
   {
-    icon: FilePlus,
-    label: 'Regras de Negócio',
-    hasDropdown: true,
-    subItems: [{ label: 'Criar regra', displayLabel: 'Nova Regra de Negócio' }, { label: 'Listar / Editar regras' }],
-  },
-  {
-    icon: ClipboardCheck,
-    label: 'Auditoria',
-    displayLabel: 'Auditoria de regras',
-    hasDropdown: true,
-    subItems: [{ label: 'Alterações realizadas' }, { label: 'Dashboard' }],
-  },
-  {
     icon: Database,
     label: 'Sistemas',
     displayLabel: 'Sistemas FGV',
@@ -35,11 +22,24 @@ const menuItems = [
     subItems: [{ label: 'Cadastrar' }, { label: 'Associar Módulos' }, { label: 'Listar / Editar' }],
   },
   {
+    icon: FilePlus,
+    label: 'Regras de Negócio',
+    hasDropdown: true,
+    subItems: [{ label: 'Criar regra', displayLabel: 'Nova Regra de Negócio' }, { label: 'Listar / Editar regras' }],
+  },
+  {
     icon: ShieldCheck,
     label: 'Conformidade',
     displayLabel: 'Acervo documental',
     hasDropdown: true,
     subItems: [{ label: 'Documentos' }],
+  },
+  {
+    icon: ClipboardCheck,
+    label: 'Auditoria',
+    displayLabel: 'Auditoria de regras',
+    hasDropdown: true,
+    subItems: [{ label: 'Alterações realizadas' }, { label: 'Dashboard' }],
   },
   {
     icon: Settings,
