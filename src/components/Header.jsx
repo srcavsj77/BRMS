@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { Bell, User, LogOut, Key, Users, ChevronDown } from 'lucide-react';
+import { Bell, User, LogOut, Key, Users, ChevronDown, HelpCircle } from 'lucide-react';
+import { useWizard } from './Wizard/WizardProvider';
+import { tourSteps } from './Wizard/wizardSteps';
 
 const Header = ({
   onNavigate,
@@ -11,6 +13,7 @@ const Header = ({
 }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const { startWizard } = useWizard();
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -25,6 +28,7 @@ const Header = ({
   return (
     <header className="fixed top-0 left-0 right-0 h-[80px] bg-primary flex items-center px-[30px] z-50 text-white shadow-md">
       <button
+        data-tour="logo"
         onClick={() => onNavigate && onNavigate('Dashboard')}
         className="flex flex-col items-start min-w-[200px] hover:opacity-80 transition-opacity cursor-pointer group text-left outline-none"
       >
@@ -51,8 +55,17 @@ const Header = ({
       <div className="flex-1"></div>
 
       <div className="flex items-center space-x-6">
+        <button
+          onClick={() => startWizard(tourSteps)}
+          className="flex items-center justify-center p-2 rounded-full hover:bg-white/10 transition-colors text-white/80 hover:text-white"
+          title="Tour Interativo (Ajuda)"
+        >
+          <HelpCircle size={24} />
+        </button>
+
         <div className="relative" ref={dropdownRef}>
           <button
+            data-tour="perfil-usuario"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             className="flex items-center space-x-4 hover:bg-white/5 p-2 rounded-xl transition-all group"
           >

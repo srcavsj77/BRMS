@@ -14,7 +14,7 @@ const Dashboard = ({
     <div className="animate-fade-in">
       <h1 className="text-[28px] font-bold text-text-title mb-[30px]">Home</h1>
 
-      <div className="cards-dimming-container grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[25px] items-start">
+      <div data-tour="card-regras" className="cards-dimming-container grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-[25px] items-start">
         <AvisosCard auditData={auditData} />
         <NoticiasCard
           notices={notices}

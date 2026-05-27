@@ -26,6 +26,7 @@ import Modal from './components/Modal';
 
 import ProfileMaintenance from './pages/ProfileMaintenance';
 import { apiClient } from './utils/apiClient';
+import { WizardTooltip } from './components/Wizard/WizardTooltip';
 
 // Constantes locais removidas (Os dados agora residem e são obtidos do servidor central)
 
@@ -604,6 +605,7 @@ function App() {
           </div>
         </div>
       </Modal>
+      <WizardTooltip />
     </Layout>
   );
 }

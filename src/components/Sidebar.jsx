@@ -116,7 +116,7 @@ const Sidebar = ({ onNavigate, activeItem, width, currentUser, profilesList }) =
       className="fixed left-0 top-0 bottom-0 bg-primary text-white overflow-y-auto z-40 transition-none pt-[80px]"
       style={{ width: `${width}px` }}
     >
-      <nav className="py-4">
+      <nav data-tour="menu-lateral" className="py-4">
         <ul className="space-y-1">
           {menuItems.map((item, index) => {
             if (!checkPermission(currentUser, item.label, profilesList)) return null;
