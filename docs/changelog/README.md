@@ -4,6 +4,15 @@ Todas as alterações notáveis neste projeto serão documentadas neste arquivo.
 
 O projeto segue os padrões de [Conventional Commits](https://www.conventionalcommits.org/) e [Semantic Versioning](https://semver.org/).
 
+## [2.6.0] - 2026-05-27
+### Adicionado
+- Configuração do sistema para utilizar zoom global padrão de 90%, otimizando significativamente o conforto visual, legibilidade das fontes e espaçamento da interface.
+- Validação estrita (bloqueio de avanço e salvamento) nas etapas de cadastro de regras com exibição de modal de alerta elegante na tela ao identificar campos obrigatórios pendentes.
+
+### Melhorado
+- Reorganização hierárquica completa da ordem dos menus no sistema.
+- Renomeação visual inteligente dos módulos no menu lateral ("Criar regra" para "Nova Regra de Negócio", "Sistemas" para "Sistemas FGV", "Auditoria" para "Auditoria de regras" e "Conformidade" para "Acervo documental"), implementada de forma a não gerar impactos no motor de permissões do usuário logado (RBAC).
+
 ## [2.5.0] - 2026-05-18
 ### Adicionado
 - Evolução de UX do Stepper (Wizard) na criação de regras: navegação direta entre etapas concluídas/acessíveis.
