@@ -70,12 +70,12 @@ Implementamos um modelo moderno de documentação técnica e funcional próxima 
 - **[Banco de Dados](./docs/banco/README.md)**: Dicionário de dados e persistência (db.json).
 - **[Changelog](./docs/changelog/README.md)**: Histórico de evoluções e correções.
 
-### Outros Documentos Corporativos:
+### Outros Documentos Corporativos
+
 - [Governança e Política de Segurança](./SECURITY.md)
 - [ADR - Decisões Arquiteturais](./docs/ADR-001-Architecture-Modernization.md)
 - [Guia de Deployment](./docs/DEPLOYMENT.md)
 - [Runbook Operacional](./docs/RUNBOOK.md)
-
 
 ## Como Contribuir (Fluxo Git)
 
