@@ -240,6 +240,33 @@ function App() {
     }
   };
 
+  const handleDeleteRule = (regra) => {
+    setRegras((prev) =>
+      prev.map((r) => (r.id_regra === regra.id_regra ? { ...r, status: 'Excluída' } : r))
+    );
+    addEventoAuditoria({
+      usuario: currentUser.name,
+      regra_id: regra.id_regra,
+      alteracao: `Regra "${regra.nome}" marcada para exclusão. Aguardando aprovação definitiva.`,
+      status: 'Excluída',
+    });
+  };
+
+  const handleApproveExclusao = (eventoId, regraId) => {
+    setRegras((prev) => prev.filter((r) => r.id_regra !== regraId));
+    setEventosAuditoria((prev) =>
+      prev.map((e) =>
+        e.id === eventoId
+          ? {
+              ...e,
+              status: 'Aprovado',
+              alteracao: `${e.alteracao} (Exclusão definitiva aprovada por ${currentUser.name})`,
+            }
+          : e
+      )
+    );
+  };
+
   const sincronizarRegrasEAuditoria = () => {
     let alteradasCount = 0;
     const novosEventos = [];
@@ -378,13 +405,20 @@ function App() {
         />
       )}
       {currentPage === 'Listar / Editar regras' && (
-        <ListRules regras={regras} systems={systems} onEdit={handleEditRule} currentUser={currentUser} />
+        <ListRules
+          regras={regras}
+          systems={systems}
+          onEdit={handleEditRule}
+          onDelete={handleDeleteRule}
+          currentUser={currentUser}
+        />
       )}
       {currentPage === 'Alterações realizadas' && (
         <AuditChanges
           regras={regras}
           auditData={eventosAuditoria}
           onEdit={handleEditRule}
+          onApproveExclusao={handleApproveExclusao}
           triggerExpiracao={sincronizarRegrasEAuditoria}
           currentUser={currentUser}
         />

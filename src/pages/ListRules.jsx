@@ -14,14 +14,16 @@ import {
   Download,
   FileSpreadsheet,
   FileText as PdfIcon,
+  Trash2,
 } from 'lucide-react';
 import { sanitizeSQL } from '../utils/security';
 import { checkPermission } from '../utils/permissions';
 
-const ListRules = ({ onEdit, regras = [], systems = [], currentUser }) => {
+const ListRules = ({ onEdit, onDelete, regras = [], systems = [], currentUser }) => {
   const [displayResults, setDisplayResults] = useState(regras);
 
   const canEdit = checkPermission(currentUser, 'Editar regra');
+  const canDelete = checkPermission(currentUser, 'Excluir regra');
 
   // Atualiza displayResults quando as regras globais mudam (ex: após expiração na Auditoria)
   useEffect(() => {
@@ -639,7 +641,7 @@ const ListRules = ({ onEdit, regras = [], systems = [], currentUser }) => {
                     </span>
                   </td>}
                   {visibleColumns.acoes && <td className="px-6 py-4 text-center whitespace-nowrap">
-                    <div className="flex items-center justify-center">
+                    <div className="flex items-center justify-center space-x-2">
                       <button
                         onClick={() => onEdit && onEdit(row)}
                         disabled={row.status === 'Excluída' || !canEdit}
@@ -653,6 +655,26 @@ const ListRules = ({ onEdit, regras = [], systems = [], currentUser }) => {
                         {!canEdit && <Lock size={12} className="mr-1.5" />}
                         <Edit size={14} className="mr-1.5" /> Editar
                       </button>
+
+                      {row.status !== 'Excluída' && (
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Deseja realmente marcar a regra "${row.nome}" como excluída? Esta ação precisa de aprovação na Auditoria.`)) {
+                              onDelete && onDelete(row);
+                            }
+                          }}
+                          disabled={!canDelete}
+                          className={`flex items-center px-4 py-1.5 text-xs font-bold border rounded-md transition-all shadow-sm ${
+                            !canDelete
+                              ? 'bg-gray-50 text-gray-400 border-gray-100 cursor-not-allowed'
+                              : 'text-red-600 hover:text-white hover:bg-red-600 border-red-200 hover:border-red-600'
+                          }`}
+                          title={!canDelete ? 'Você não tem permissão para excluir regras.' : 'Marcar regra para exclusão'}
+                        >
+                          {!canDelete && <Lock size={12} className="mr-1.5" />}
+                          <Trash2 size={14} className="mr-1.5" /> Excluir
+                        </button>
+                      )}
                     </div>
                   </td>}
                 </tr>

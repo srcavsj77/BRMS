@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { checkPermission } from '../utils/permissions';
 
-const AuditChanges = ({ onEdit, regras, auditData = [], triggerExpiracao, currentUser }) => {
+const AuditChanges = ({ onEdit, regras, auditData = [], triggerExpiracao, onApproveExclusao, currentUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -94,7 +94,16 @@ const AuditChanges = ({ onEdit, regras, auditData = [], triggerExpiracao, curren
 
   const confirmAction = (choice) => {
     if (!canApprove) return;
-    // ... rest of confirmAction (simulated)
+    if (choice === 'Sim' && selectedItem) {
+      if (onApproveExclusao) {
+        onApproveExclusao(selectedItem.id, selectedItem.regra_id);
+      }
+      setNotification({
+        message: `Exclusão definitiva da regra ${selectedItem.regra_id} aprovada com sucesso.`,
+        type: 'success',
+      });
+      setTimeout(() => setNotification(null), 3000);
+    }
     setShowModal(false);
     setSelectedItem(null);
   };
