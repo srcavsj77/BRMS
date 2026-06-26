@@ -11,9 +11,10 @@ const getBaseUrl = () => {
 
 const API_BASE_URL = getBaseUrl();
 
-const getHeaders = (includeAuth = true) => {
+const getHeaders = (includeAuth = true, customHeaders = {}) => {
   const headers = {
     'Content-Type': 'application/json',
+    ...customHeaders,
   };
 
   if (includeAuth) {
@@ -34,10 +35,10 @@ export const apiClient = {
     return this.handleResponse(response);
   },
 
-  async post(endpoint, body, includeAuth = true) {
+  async post(endpoint, body, includeAuth = true, customHeaders = {}) {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
-      headers: getHeaders(includeAuth),
+      headers: getHeaders(includeAuth, customHeaders),
       body: JSON.stringify(body),
     });
     return this.handleResponse(response);

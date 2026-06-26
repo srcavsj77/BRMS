@@ -30,6 +30,11 @@ const UsersManagement = ({ usersList, onUpdateUsers, currentUser, profilesList =
     funcao: '',
   });
 
+  const [isSudoOpen, setIsSudoOpen] = useState(false);
+  const [sudoPassword, setSudoPassword] = useState('');
+  const [pendingAction, setPendingAction] = useState(null);
+  const [sudoError, setSudoError] = useState('');
+
   const isAdmin = currentUser?.role === ROLES.ADMIN;
 
   // Encontrar dados do perfil selecionado na lista dinâmica
@@ -77,27 +82,50 @@ const UsersManagement = ({ usersList, onUpdateUsers, currentUser, profilesList =
     return admins.length === 1 && admins[0].id === id;
   };
 
+  const handleSudoConfirm = async (e) => {
+    e.preventDefault();
+    setSudoError('');
+    try {
+      const success = await pendingAction(sudoPassword);
+      if (success) {
+        setIsSudoOpen(false);
+        setSudoPassword('');
+        setPendingAction(null);
+      }
+    } catch (err) {
+      setSudoError(err.message || 'Erro ao validar confirmação de senha.');
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!isAdmin) return;
+
+    let newUsersList;
     if (selectedUser) {
-      // Bloquear mudança de role se for último admin tentando deixar de ser admin
       if (isLastAdmin(selectedUser.id) && formData.role !== ROLES.ADMIN) {
         alert(
           'Este é o único administrador ativo do sistema. Você não pode alterar o cargo para manter pelo menos um administrador.'
         );
         return;
       }
-
-      onUpdateUsers(usersList.map((u) => (u.id === selectedUser.id ? { ...u, ...formData } : u)));
+      newUsersList = usersList.map((u) => (u.id === selectedUser.id ? { ...u, ...formData } : u));
     } else {
       const newUser = {
         id: Date.now(),
         ...formData,
       };
-      onUpdateUsers([...usersList, newUser]);
+      newUsersList = [...usersList, newUser];
     }
-    setIsModalOpen(false);
+
+    setPendingAction(() => async (pwd) => {
+      const success = await onUpdateUsers(newUsersList, pwd);
+      if (success) {
+        setIsModalOpen(false);
+      }
+      return success;
+    });
+    setIsSudoOpen(true);
   };
 
   const handleDelete = (id) => {
@@ -107,7 +135,11 @@ const UsersManagement = ({ usersList, onUpdateUsers, currentUser, profilesList =
       return;
     }
     if (window.confirm('Tem certeza que deseja excluir este usuário?')) {
-      onUpdateUsers(usersList.filter((u) => u.id !== id));
+      const newUsersList = usersList.filter((u) => u.id !== id);
+      setPendingAction(() => async (pwd) => {
+        return await onUpdateUsers(newUsersList, pwd);
+      });
+      setIsSudoOpen(true);
     }
   };
 
@@ -118,7 +150,11 @@ const UsersManagement = ({ usersList, onUpdateUsers, currentUser, profilesList =
       return;
     }
     const newStatus = user.status === 'Ativo' ? 'Bloqueado' : 'Ativo';
-    onUpdateUsers(usersList.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u)));
+    const newUsersList = usersList.map((u) => (u.id === user.id ? { ...u, status: newStatus } : u));
+    setPendingAction(() => async (pwd) => {
+      return await onUpdateUsers(newUsersList, pwd);
+    });
+    setIsSudoOpen(true);
   };
 
   return (
@@ -442,6 +478,64 @@ const UsersManagement = ({ usersList, onUpdateUsers, currentUser, profilesList =
                 {selectedUser ? 'Salvar Perfil' : 'Criar Usuário'}
               </button>
             )}
+          </div>
+        </form>
+      </Modal>
+
+      {/* Modal de Confirmação Sudo (Reautenticação) */}
+      <Modal
+        isOpen={isSudoOpen}
+        onClose={() => {
+          setIsSudoOpen(false);
+          setSudoPassword('');
+          setSudoError('');
+          setPendingAction(null);
+        }}
+        title="Confirmação de Segurança"
+        maxWidth="max-w-md"
+      >
+        <form onSubmit={handleSudoConfirm} className="space-y-4">
+          <p className="text-sm text-gray-600 leading-relaxed">
+            Esta operação requer privilégios elevados. Para continuar, insira a sua senha de <strong>Administrador</strong> para confirmar a sua identidade.
+          </p>
+
+          <div className="space-y-1">
+            <label className="text-sm font-semibold text-gray-700">Senha do Administrador *</label>
+            <input
+              type="password"
+              required
+              placeholder="Digite sua senha de acesso"
+              className="w-full border rounded-lg p-2.5 focus:ring-2 focus:ring-secondary/20 focus:border-secondary outline-none"
+              value={sudoPassword}
+              onChange={(e) => setSudoPassword(e.target.value)}
+            />
+          </div>
+
+          {sudoError && (
+            <div className="bg-red-50 text-red-700 text-xs p-3 rounded-lg border border-red-100 font-medium">
+              {sudoError}
+            </div>
+          )}
+
+          <div className="pt-4 border-t flex justify-end space-x-3">
+            <button
+              type="button"
+              onClick={() => {
+                setIsSudoOpen(false);
+                setSudoPassword('');
+                setSudoError('');
+                setPendingAction(null);
+              }}
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-500 hover:bg-gray-50 transition-all font-black text-[12px] uppercase tracking-widest leading-none shadow-sm active:scale-95 outline-none"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-all font-black shadow-md active:scale-95 text-[12px] uppercase tracking-widest leading-none outline-none"
+            >
+              Confirmar
+            </button>
           </div>
         </form>
       </Modal>

@@ -140,7 +140,27 @@ function App() {
     };
 
     saveData();
-  }, [regras, eventosAuditoria, systems, profilesList, usersList, notices, isLoaded, authToken]);
+  }, [regras, eventosAuditoria, systems, profilesList, notices, isLoaded, authToken]);
+
+  const handleUpdateUsers = async (newUsersList, adminPassword) => {
+    try {
+      await apiClient.post('/api/save', {
+        regras,
+        eventosAuditoria,
+        systems,
+        profilesList,
+        usersList: newUsersList,
+        notices,
+      }, true, {
+        'X-Admin-Confirm-Password': adminPassword
+      });
+      setUsersList(newUsersList);
+      return true;
+    } catch (err) {
+      console.error('Erro ao atualizar usuários:', err);
+      throw err;
+    }
+  };
 
   const handleLogin = (data) => {
     const { user, token } = data;
@@ -448,7 +468,7 @@ function App() {
       {currentPage === 'Usuários' && (
         <UsersManagement
           usersList={usersList}
-          onUpdateUsers={setUsersList}
+          onUpdateUsers={handleUpdateUsers}
           currentUser={currentUser}
           profilesList={profilesList}
         />
