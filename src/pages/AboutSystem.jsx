@@ -61,10 +61,8 @@ const TabGerais = () => (
       <DataBox label="Sigla" value="BRMS-FGV" icon={Terminal} />
       <DataBox label="Empresa / Instituição" value="Fundação Getulio Vargas" icon={Globe} />
       <DataBox label="Proprietário (Owner)" value="Diretoria de Tecnologia" icon={Users} />
-      <DataBox label="Responsável Técnico" value="Arquitetura Enterprise" icon={Code} />
       <DataBox label="Product Owner" value="Comitê de Governança" icon={Settings} />
       <DataBox label="Status Operacional" value="Produção (Ativo)" icon={Activity} statusColor="green" />
-      <DataBox label="SLA de Disponibilidade" value="99.9%" icon={Clock} />
     </div>
     <div className="mt-6 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
       <h4 className="text-xs font-bold uppercase text-blue-800 mb-2">Descrição Funcional</h4>
