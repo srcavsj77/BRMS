@@ -19,7 +19,7 @@ const menuItems = [
     label: 'Sistemas',
     displayLabel: 'Sistemas FGV',
     hasDropdown: true,
-    subItems: [{ label: 'Cadastrar' }, { label: 'Associar Módulos' }, { label: 'Listar / Editar' }],
+    subItems: [{ label: 'Cadastrar', displayLabel: 'Novo Sistema' }, { label: 'Associar Módulos' }, { label: 'Listar / Editar', displayLabel: 'Consulta / Alteração' }],
   },
   {
     icon: FilePlus,

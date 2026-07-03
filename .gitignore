@@ -126,3 +126,7 @@ firebase-adminsdk.json
 
 # DB data
 db.json
+
+# Build and cache directories
+.next/
+.angular/
