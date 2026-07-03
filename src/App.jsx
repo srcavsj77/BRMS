@@ -40,6 +40,7 @@ function App() {
   const [profilesList, setProfilesList] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [notices, setNotices] = useState([]);
+  const [historicoRegras, setHistoricoRegras] = useState([]);
 
   const [isServiceRunning, setIsServiceRunning] = useState(true);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -96,6 +97,7 @@ function App() {
         setProfilesList(data.profilesList || []);
         setUsersList(data.usersList || []);
         setNotices(data.notices || []);
+        setHistoricoRegras(data.historicoRegras || []);
       } catch (err) {
         console.error('Erro ao buscar dados do servidor central:', err);
         if (err.status === 401 || err.status === 403) {
@@ -126,6 +128,7 @@ function App() {
           profilesList,
           usersList,
           notices,
+          historicoRegras,
         });
       } catch (err) {
         console.error('Erro ao sincronizar dados com o servidor:', err);
@@ -140,7 +143,7 @@ function App() {
     };
 
     saveData();
-  }, [regras, eventosAuditoria, systems, profilesList, notices, isLoaded, authToken]);
+  }, [regras, eventosAuditoria, systems, profilesList, notices, historicoRegras, isLoaded, authToken]);
 
   const handleUpdateUsers = async (newUsersList, adminPassword) => {
     try {
@@ -151,6 +154,7 @@ function App() {
         profilesList,
         usersList: newUsersList,
         notices,
+        historicoRegras,
       }, true, {
         'X-Admin-Confirm-Password': adminPassword
       });
@@ -215,6 +219,7 @@ function App() {
       descricao: novaRegra.descricao_funcional,
       sistema: novaRegra.sistema_associado,
       categoria: novaRegra.categoria,
+      criticidade: novaRegra.criticidade || 'Média',
       usuario: currentUser.name,
       criacao: novaRegra.data_criacao,
       modificacao: isEdit
@@ -258,6 +263,105 @@ function App() {
         status: 'Novo',
       });
     }
+
+    // Gravar histórico da versão salva
+    const historicoItem = {
+      id_historico: `hist-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id_regra: regraFormatada.id_regra,
+      nome: regraFormatada.nome,
+      versao: regraFormatada.versao,
+      descricao: regraFormatada.descricao,
+      sistema: regraFormatada.sistema,
+      categoria: regraFormatada.categoria,
+      criticidade: regraFormatada.criticidade,
+      expressao: regraFormatada.expressao,
+      status: regraFormatada.status,
+      vigencia_inicio: regraFormatada.vigencia_inicio,
+      vigencia_fim: regraFormatada.vigencia_fim,
+      usuario: regraFormatada.usuario,
+      data_alteracao: regraFormatada.modificacao || regraFormatada.criacao,
+      justificativa: isEdit ? (novaRegra.justificativa_alteracao || 'Edição de regra') : 'Criação original'
+    };
+    setHistoricoRegras((prev) => [...prev, historicoItem]);
+  };
+
+  const handleRollbackRule = (historicoItem) => {
+    const currentRule = regras.find((r) => r.id_regra === historicoItem.id_regra);
+    if (!currentRule) return;
+
+    // Incrementar a versão da regra (ex: 1.0.0 -> 1.0.1)
+    const currentVersion = currentRule.versao || '1.0.0';
+    let nextVersion = currentVersion;
+    const versionParts = currentVersion.split('.');
+    if (versionParts.length === 3) {
+      const patch = parseInt(versionParts[2], 10);
+      if (!isNaN(patch)) {
+        nextVersion = `${versionParts[0]}.${versionParts[1]}.${patch + 1}`;
+      }
+    } else {
+      nextVersion = currentVersion + '.1';
+    }
+
+    const d = new Date();
+    const dataHoraReversao =
+      d.getFullYear() +
+      '-' +
+      String(d.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(d.getDate()).padStart(2, '0') +
+      ' ' +
+      String(d.getHours()).padStart(2, '0') +
+      ':' +
+      String(d.getMinutes()).padStart(2, '0');
+
+    const ruleRestored = {
+      id_regra: historicoItem.id_regra,
+      nome: historicoItem.nome,
+      versao: nextVersion,
+      descricao: historicoItem.descricao,
+      sistema: historicoItem.sistema,
+      categoria: historicoItem.categoria,
+      criticidade: historicoItem.criticidade || 'Média',
+      expressao: historicoItem.expressao,
+      status: historicoItem.status,
+      vigencia_inicio: historicoItem.vigencia_inicio,
+      vigencia_fim: historicoItem.vigencia_fim,
+      usuario: currentUser.name,
+      criacao: currentRule.criacao, // Mantém data de criação original
+      modificacao: dataHoraReversao,
+    };
+
+    setRegras((prev) =>
+      prev.map((r) => (r.id_regra === ruleRestored.id_regra ? ruleRestored : r))
+    );
+
+    // Salvar o novo estado restaurado no histórico também
+    const newHistoryItem = {
+      id_historico: `hist-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id_regra: ruleRestored.id_regra,
+      nome: ruleRestored.nome,
+      versao: ruleRestored.versao,
+      descricao: ruleRestored.descricao,
+      sistema: ruleRestored.sistema,
+      categoria: ruleRestored.categoria,
+      criticidade: ruleRestored.criticidade,
+      expressao: ruleRestored.expressao,
+      status: ruleRestored.status,
+      vigencia_inicio: ruleRestored.vigencia_inicio,
+      vigencia_fim: ruleRestored.vigencia_fim,
+      usuario: ruleRestored.usuario,
+      data_alteracao: ruleRestored.modificacao,
+      justificativa: `Reversão para a versão ${historicoItem.versao} (justificativa original: "${historicoItem.justificativa}")`,
+    };
+
+    setHistoricoRegras((prev) => [...prev, newHistoryItem]);
+
+    addEventoAuditoria({
+      usuario: currentUser.name,
+      regra_id: ruleRestored.id_regra,
+      alteracao: `Regra revertida para a versão ${historicoItem.versao}. Nova versão: ${nextVersion}`,
+      status: 'Ajuste',
+    });
   };
 
   const handleDeleteRule = (regra) => {
@@ -431,6 +535,8 @@ function App() {
           onEdit={handleEditRule}
           onDelete={handleDeleteRule}
           currentUser={currentUser}
+          historicoRegras={historicoRegras}
+          onRollback={handleRollbackRule}
         />
       )}
       {currentPage === 'Alterações realizadas' && (
@@ -443,7 +549,9 @@ function App() {
           currentUser={currentUser}
         />
       )}
-      {currentPage === 'Dashboard' && <AuditReports regras={regras} />}
+      {currentPage === 'Dashboard' && (
+        <AuditReports regras={regras} auditData={eventosAuditoria} />
+      )}
       {currentPage === 'Cadastrar' && (
         <CreateSystem systems={systems} onAdd={addSystem} onNavigate={setCurrentPage} currentUser={currentUser} />
       )}

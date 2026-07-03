@@ -15,12 +15,25 @@ import {
   FileSpreadsheet,
   FileText as PdfIcon,
   Trash2,
+  History,
+  X,
+  Clock,
+  CornerUpLeft,
 } from 'lucide-react';
 import { sanitizeSQL } from '../utils/security';
 import { checkPermission } from '../utils/permissions';
 
-const ListRules = ({ onEdit, onDelete, regras = [], systems = [], currentUser }) => {
+const ListRules = ({
+  onEdit,
+  onDelete,
+  regras = [],
+  systems = [],
+  currentUser,
+  historicoRegras = [],
+  onRollback,
+}) => {
   const [displayResults, setDisplayResults] = useState(regras);
+  const [selectedRuleForHistory, setSelectedRuleForHistory] = useState(null);
 
   const canEdit = checkPermission(currentUser, 'Editar regra');
   const canDelete = checkPermission(currentUser, 'Excluir regra');
@@ -643,6 +656,14 @@ const ListRules = ({ onEdit, onDelete, regras = [], systems = [], currentUser })
                   {visibleColumns.acoes && <td className="px-6 py-4 text-center whitespace-nowrap">
                     <div className="flex items-center justify-center space-x-2">
                       <button
+                        onClick={() => setSelectedRuleForHistory(row)}
+                        className="flex items-center px-3 py-1.5 text-xs font-bold border rounded-md transition-all shadow-sm text-primary hover:text-white hover:bg-primary border-primary/20 hover:border-primary"
+                        title="Ver histórico de alterações e versionamento"
+                      >
+                        <History size={14} className="mr-1.5" /> Histórico
+                      </button>
+
+                      <button
                         onClick={() => onEdit && onEdit(row)}
                         disabled={row.status === 'Excluída' || !canEdit}
                         className={`flex items-center px-4 py-1.5 text-xs font-bold border rounded-md transition-all shadow-sm ${
@@ -727,6 +748,139 @@ const ListRules = ({ onEdit, onDelete, regras = [], systems = [], currentUser })
           </div>
         </div>
       </div>
+
+      {/* Modal de Histórico de Versões */}
+      {selectedRuleForHistory && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 border border-gray-100 flex flex-col max-h-[85vh] animate-scale-up">
+            {/* Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 rounded-t-2xl">
+              <div className="flex items-center space-x-3 text-primary">
+                <div className="p-2 bg-primary/10 rounded-xl">
+                  <Clock size={22} />
+                </div>
+                <div>
+                  <h3 className="text-lg font-extrabold tracking-tight">Histórico de Alterações</h3>
+                  <p className="text-xs text-gray-500 font-medium">
+                    Visualizando versões de <span className="font-mono text-secondary font-bold">{selectedRuleForHistory.id_regra}</span> — {selectedRuleForHistory.nome}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedRuleForHistory(null)}
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-xl transition-all"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Content Body */}
+            <div className="p-6 overflow-y-auto flex-1 custom-scrollbar space-y-6">
+              {(() => {
+                const historyList = historicoRegras
+                  .filter((h) => h.id_regra === selectedRuleForHistory.id_regra)
+                  .sort((a, b) => new Date(b.data_alteracao) - new Date(a.data_alteracao));
+
+                if (historyList.length === 0) {
+                  return (
+                    <div className="text-center py-12 bg-gray-50/50 rounded-2xl border border-dashed border-gray-200">
+                      <History size={40} className="mx-auto text-gray-300 mb-3" />
+                      <p className="text-sm font-bold text-gray-400">Nenhum histórico registrado para esta regra</p>
+                      <p className="text-xs text-gray-400 mt-1 max-w-sm mx-auto">
+                        Novos registros de histórico serão criados automaticamente a partir do momento em que esta regra for editada ou recriada.
+                      </p>
+                    </div>
+                  );
+                }
+
+                return (
+                  <div className="relative border-l-2 border-gray-200 ml-4 pl-6 space-y-6 py-2">
+                    {historyList.map((item, index) => (
+                      <div key={item.id_historico} className="relative group">
+                        {/* Timeline node */}
+                        <div className="absolute -left-[31px] top-1.5 w-4 h-4 rounded-full border-2 border-white bg-secondary ring-4 ring-secondary/15 transition-all group-hover:scale-125 shadow-sm" />
+
+                        {/* Card */}
+                        <div className="bg-white p-5 rounded-2xl border border-gray-100 hover:border-gray-200 hover:shadow-md transition-all shadow-sm flex flex-col md:flex-row md:items-start justify-between gap-4">
+                          <div className="flex-1 space-y-3">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="px-2.5 py-0.5 bg-secondary text-white text-[10px] font-black uppercase tracking-wider rounded border border-secondary shadow-sm shadow-secondary/10">
+                                v{item.versao}
+                              </span>
+                              <span className="text-[11px] text-gray-400 font-bold">
+                                {item.data_alteracao}
+                              </span>
+                              <span className="text-[11px] bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full font-bold">
+                                Alterado por: {item.usuario}
+                              </span>
+                              <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${
+                                item.criticidade === 'Alta'
+                                  ? 'bg-red-50 text-red-700 border border-red-100'
+                                  : item.criticidade === 'Média'
+                                    ? 'bg-orange-50 text-orange-700 border border-orange-100'
+                                    : 'bg-green-50 text-green-700 border border-green-100'
+                              }`}>
+                                Criticidade: {item.criticidade || 'Média'}
+                              </span>
+                            </div>
+
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                Expressão Lógica
+                              </p>
+                              <pre className="p-3 bg-gray-50 border border-gray-100 rounded-lg font-mono text-[11px] text-secondary font-bold overflow-x-auto">
+                                {item.expressao}
+                              </pre>
+                            </div>
+
+                            {item.descricao && (
+                              <div className="text-xs text-gray-500 font-medium">
+                                <span className="font-bold text-gray-700">Descrição: </span>
+                                {item.descricao}
+                              </div>
+                            )}
+
+                            {item.justificativa && (
+                              <div className="bg-gray-50/50 px-3 py-2 rounded-lg border border-gray-100 italic text-xs text-gray-500">
+                                <strong>Justificativa: </strong>"{item.justificativa}"
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Rollback button */}
+                          {canEdit && (
+                            <button
+                              onClick={() => {
+                                if (window.confirm(`Tem certeza que deseja restaurar a regra para a versão ${item.versao}? Esta ação criará uma nova versão contendo estes mesmos parâmetros.`)) {
+                                  onRollback && onRollback(item);
+                                  setSelectedRuleForHistory(null);
+                                }
+                              }}
+                              className="md:self-start flex items-center justify-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-xl text-xs font-black transition-all active:scale-95 shadow-md shadow-orange-500/10 uppercase tracking-widest outline-none gap-1.5 shrink-0"
+                            >
+                              <CornerUpLeft size={14} strokeWidth={2.5} /> Restaurar
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Footer */}
+            <div className="p-4 border-t border-gray-100 bg-gray-50/30 flex justify-end rounded-b-2xl">
+              <button
+                onClick={() => setSelectedRuleForHistory(null)}
+                className="px-6 py-2.5 bg-gray-100 text-gray-600 rounded-xl text-xs font-black hover:bg-gray-200 transition-all uppercase tracking-widest outline-none active:scale-95 border border-gray-200"
+              >
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
