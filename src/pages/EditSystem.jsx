@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Database, Search, Edit2, Trash2, X, Save, AlertCircle, CheckCircle, Layers } from 'lucide-react';
+import { Database, Search, Edit2, Trash2, X, Save, AlertCircle, CheckCircle, Layers, Eye } from 'lucide-react';
 import { checkPermission } from '../utils/permissions';
 import Modal from '../components/Modal';
 
@@ -11,6 +11,7 @@ const EditSystem = ({
   onAddAuditEvent,
   onNavigate,
   onSelectSystemForModules,
+  onSelectSystemFilter,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [editingSystem, setEditingSystem] = useState(null);
@@ -208,6 +209,16 @@ const EditSystem = ({
                     </td>
                     <td className="p-4 text-center">
                       <div className="flex items-center justify-center space-x-2">
+                        <button
+                          onClick={() => {
+                            if (onSelectSystemFilter) onSelectSystemFilter(sys.nome);
+                            if (onNavigate) onNavigate('Listar / Editar regras');
+                          }}
+                          className="p-2 rounded-lg transition-colors text-gray-400 hover:text-primary hover:bg-primary/10"
+                          title="Exibir regras associadas ao sistema"
+                        >
+                          <Eye size={18} />
+                        </button>
                         <button
                           onClick={() => {
                             if(onSelectSystemForModules) onSelectSystemForModules(sys.nome);

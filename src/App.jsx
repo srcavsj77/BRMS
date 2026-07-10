@@ -48,6 +48,13 @@ function App() {
   const [isProfileDetailOpen, setIsProfileDetailOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [selectedSystemForModules, setSelectedSystemForModules] = useState('');
+  const [selectedSystemFilter, setSelectedSystemFilter] = useState('');
+
+  const navigate = (page) => {
+    if (page !== 'Editar regra') setEditingRule(null);
+    if (page !== 'Listar / Editar regras') setSelectedSystemFilter('');
+    setCurrentPage(page);
+  };
 
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('brms_session');
@@ -170,13 +177,13 @@ function App() {
     const { user, token } = data;
     setAuthToken(token);
     setCurrentUser(user);
-    setCurrentPage('Home');
+    navigate('Home');
   };
 
   const handleLogout = () => {
     setCurrentUser(null);
     setAuthToken(null);
-    setCurrentPage('Home');
+    navigate('Home');
     setRegras([]); // Limpar os dados da memória por segurança
     setEventosAuditoria([]);
     setSystems([]);
@@ -208,7 +215,7 @@ function App() {
 
   const handleEditRule = (rule) => {
     setEditingRule(rule);
-    setCurrentPage('Editar regra');
+    navigate('Editar regra');
   };
 
   const handleSaveRule = (novaRegra, isEdit) => {
@@ -498,10 +505,7 @@ function App() {
 
   return (
     <Layout
-      onNavigate={(page) => {
-        if (page !== 'Editar regra') setEditingRule(null);
-        setCurrentPage(page);
-      }}
+      onNavigate={navigate}
       currentPage={currentPage}
       currentUser={currentUser}
       onLogout={handleLogout}
@@ -525,7 +529,7 @@ function App() {
           systems={systems}
           currentUser={currentUser}
           onSave={handleSaveRule}
-          onNavigate={setCurrentPage}
+          onNavigate={navigate}
         />
       )}
       {currentPage === 'Listar / Editar regras' && (
@@ -537,6 +541,7 @@ function App() {
           currentUser={currentUser}
           historicoRegras={historicoRegras}
           onRollback={handleRollbackRule}
+          initialSystemFilter={selectedSystemFilter}
         />
       )}
       {currentPage === 'Alterações realizadas' && (
@@ -553,7 +558,7 @@ function App() {
         <AuditReports regras={regras} auditData={eventosAuditoria} />
       )}
       {currentPage === 'Cadastrar' && (
-        <CreateSystem systems={systems} onAdd={addSystem} onNavigate={setCurrentPage} currentUser={currentUser} />
+        <CreateSystem systems={systems} onAdd={addSystem} onNavigate={navigate} currentUser={currentUser} />
       )}
       {currentPage === 'Associar Módulos' && (
         <AssociateModules 
@@ -598,7 +603,7 @@ function App() {
             systems={systems}
             currentUser={currentUser}
             onSave={handleSaveRule}
-            onNavigate={setCurrentPage}
+            onNavigate={navigate}
           />
         ) : (
           <div className="flex items-center justify-center min-h-[400px]">
@@ -612,8 +617,9 @@ function App() {
           onUpdateSystems={setSystems}
           currentUser={currentUser}
           onAddAuditEvent={addEventoAuditoria}
-          onNavigate={setCurrentPage}
+          onNavigate={navigate}
           onSelectSystemForModules={setSelectedSystemForModules}
+          onSelectSystemFilter={setSelectedSystemFilter}
         />
       )}
       {currentPage !== 'Dashboard' &&

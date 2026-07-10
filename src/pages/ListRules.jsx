@@ -31,17 +31,15 @@ const ListRules = ({
   currentUser,
   historicoRegras = [],
   onRollback,
+  initialSystemFilter,
 }) => {
-  const [displayResults, setDisplayResults] = useState(regras);
+  const [displayResults, setDisplayResults] = useState(() =>
+    initialSystemFilter ? regras.filter(r => r.sistema === initialSystemFilter) : regras
+  );
   const [selectedRuleForHistory, setSelectedRuleForHistory] = useState(null);
 
   const canEdit = checkPermission(currentUser, 'Editar regra');
   const canDelete = checkPermission(currentUser, 'Excluir regra');
-
-  // Atualiza displayResults quando as regras globais mudam (ex: após expiração na Auditoria)
-  useEffect(() => {
-    setDisplayResults(regras);
-  }, [regras]);
 
   const prefsKey = `brms_columns_prefs_${currentUser?.name}`;
   
@@ -82,9 +80,29 @@ const ListRules = ({
     vigencia_inicio: '',
     vigencia_fim: '',
     status: '',
-    sistema: '',
+    sistema: initialSystemFilter || '',
     categoria: '',
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const [prevInitialSystemFilter, setPrevInitialSystemFilter] = useState(initialSystemFilter);
+  const [prevRegras, setPrevRegras] = useState(regras);
+
+  if (initialSystemFilter !== prevInitialSystemFilter || regras !== prevRegras) {
+    setPrevInitialSystemFilter(initialSystemFilter);
+    setPrevRegras(regras);
+    setFilters(prev => ({
+      ...prev,
+      sistema: initialSystemFilter || '',
+      categoria: prev.sistema !== initialSystemFilter ? '' : prev.categoria
+    }));
+    setDisplayResults(initialSystemFilter ? regras.filter(r => r.sistema === initialSystemFilter) : regras);
+    setCurrentPage(1);
+  }
+
+  const itemsPerPage = 10;
+  const [showFilters, setShowFilters] = useState(false);
 
   const modulosDisponiveis = useMemo(() => {
     if (!filters.sistema) return [];
@@ -92,9 +110,6 @@ const ListRules = ({
     if (!sys || !sys.modulos) return [];
     return sys.modulos.split(',').map(m => m.trim()).filter(Boolean);
   }, [filters.sistema, systems]);
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
 
   // Suggestions state
   const [idSuggestions, setIdSuggestions] = useState([]);
@@ -337,176 +352,193 @@ const ListRules = ({
             </p>
           </div>
         </div>
-        {!canEdit && (
-          <div className="flex items-center space-x-2 bg-gray-100 px-4 py-2 rounded-lg border border-gray-200 text-gray-500 font-bold text-xs uppercase tracking-widest shadow-inner">
-            <Lock size={14} className="text-gray-400" />
-            <span>Modo de Leitura</span>
-          </div>
-        )}
+        <div className="flex items-center space-x-3">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`flex items-center space-x-2 px-4 py-2.5 rounded-lg border transition-all font-bold text-[11px] uppercase tracking-wider active:scale-95 shadow-sm ${
+              showFilters 
+                ? 'bg-secondary/10 border-secondary/20 text-secondary hover:bg-secondary/20' 
+                : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+            }`}
+            title={showFilters ? "Ocultar Filtros de Busca" : "Exibir Filtros de Busca"}
+          >
+            <Filter size={13} className={showFilters ? "text-secondary" : "text-gray-400"} />
+            <span>{showFilters ? "Ocultar Filtros" : "Exibir Filtros"}</span>
+          </button>
+          {!canEdit && (
+            <div className="flex items-center space-x-2 bg-gray-100 px-4 py-2.5 rounded-lg border border-gray-200 text-gray-500 font-bold text-xs uppercase tracking-widest shadow-inner">
+              <Lock size={14} className="text-gray-400" />
+              <span>Modo de Leitura</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Seção de Filtros */}
-      <div className="bg-white rounded-card shadow-card p-6 border border-gray-100">
-        <div className="flex items-center space-x-2 mb-6 text-secondary border-b pb-4">
-          <Filter size={18} />
-          <h2 className="font-bold text-lg text-primary">Consulta/Alteração Valores Cadastrados</h2>
-        </div>
-
-        <div className="space-y-6">
-          <div className="flex flex-wrap items-start gap-6">
-            {/* ID da Regra with Autocomplete */}
-            <div className="w-36 space-y-2 relative" ref={idRef}>
-              <label className="text-sm font-bold text-text-title flex items-center">
-                ID da Regra{' '}
-                <div
-                  className="ml-1 text-gray-400 cursor-help"
-                  title="Identificador único da regra"
-                >
-                  <RotateCcw size={12} className="rotate-180" />
-                </div>
-              </label>
-              <input
-                name="id_regra"
-                value={filters.id_regra}
-                onChange={handleChange}
-                autoComplete="off"
-                onFocus={() => filters.id_regra.length > 0 && setShowIdDropdown(true)}
-                placeholder="Ex: RULE-1234"
-                className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 outline-none transition-all font-mono text-secondary bg-gray-50/50"
-              />
-              {showIdDropdown && idSuggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
-                  {idSuggestions.map((suggestion, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleSelectSuggestion('id_regra', suggestion)}
-                      className="w-full text-left px-4 py-2 text-xs font-mono text-secondary hover:bg-secondary/5 hover:text-secondary transition-colors border-b last:border-0 border-gray-50"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Nome da Regra with Autocomplete */}
-            <div className="w-[350px] space-y-2 relative" ref={nomeRef}>
-              <label className="text-sm font-bold text-text-title">Nome da Regra *</label>
-              <input
-                name="nome_regra"
-                value={filters.nome_regra}
-                onChange={handleChange}
-                autoComplete="off"
-                onFocus={() => filters.nome_regra.length > 0 && setShowNomeDropdown(true)}
-                placeholder="Ex: Validação de Elegibilidade de Bolsista"
-                className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 outline-none transition-all"
-              />
-              {showNomeDropdown && nomeSuggestions.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
-                  {nomeSuggestions.map((suggestion, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleSelectSuggestion('nome_regra', suggestion)}
-                      className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-primary/5 hover:text-primary transition-colors border-b last:border-0 border-gray-50 font-medium"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            <div className="w-48 space-y-2">
-              <label className="text-sm font-bold text-text-title">Sistema:</label>
-              <select
-                name="sistema"
-                value={filters.sistema || ''}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600 bg-white"
-              >
-                <option value="">Todos</option>
-                {systems.map((sys, idx) => (
-                  <option key={idx} value={sys.nome}>{sys.nome}</option>
-                ))}
-              </select>
-            </div>
-
-            {/* Módulo do Sistema */}
-            <div className="w-48 space-y-2">
-              <label className="text-sm font-bold text-text-title">Módulo:</label>
-              <select
-                name="categoria"
-                value={filters.categoria || ''}
-                onChange={handleChange}
-                disabled={!filters.sistema}
-                className={`w-full border rounded-lg p-2.5 text-sm outline-none transition-all ${
-                  filters.sistema 
-                    ? 'border-gray-300 focus:ring-2 focus:ring-secondary/20 bg-white text-gray-600' 
-                    : 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed'
-                }`}
-              >
-                <option value="">{filters.sistema ? 'Todos' : 'Selecione o Sistema...'}</option>
-                {modulosDisponiveis.map((mod, idx) => (
-                  <option key={idx} value={mod}>{mod}</option>
-                ))}
-              </select>
-            </div>
+      {showFilters && (
+        <div className="bg-white rounded-card shadow-card p-6 border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="flex items-center space-x-2 mb-6 text-secondary border-b pb-4">
+            <Filter size={18} />
+            <h2 className="font-bold text-lg text-primary">Consulta/Alteração Valores Cadastrados</h2>
           </div>
 
-          <div className="flex flex-wrap items-end gap-6 text-sm">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-text-title">Vigência (Período):</label>
-              <div className="flex items-center space-x-2">
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-start gap-6">
+              {/* ID da Regra with Autocomplete */}
+              <div className="w-36 space-y-2 relative" ref={idRef}>
+                <label className="text-sm font-bold text-text-title flex items-center">
+                  ID da Regra{' '}
+                  <div
+                    className="ml-1 text-gray-400 cursor-help"
+                    title="Identificador único da regra"
+                  >
+                    <RotateCcw size={12} className="rotate-180" />
+                  </div>
+                </label>
                 <input
-                  type="date"
-                  name="vigencia_inicio"
-                  value={filters.vigencia_inicio}
+                  name="id_regra"
+                  value={filters.id_regra}
                   onChange={handleChange}
-                  className="w-36 border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600"
+                  autoComplete="off"
+                  onFocus={() => filters.id_regra.length > 0 && setShowIdDropdown(true)}
+                  placeholder="Ex: RULE-1234"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 outline-none transition-all font-mono text-secondary bg-gray-50/50"
                 />
-                <span className="text-gray-400">até</span>
+                {showIdDropdown && idSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                    {idSuggestions.map((suggestion, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectSuggestion('id_regra', suggestion)}
+                        className="w-full text-left px-4 py-2.5 text-xs font-mono text-secondary hover:bg-secondary/5 hover:text-secondary transition-colors"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Nome da Regra with Autocomplete */}
+              <div className="flex-1 min-w-[280px] space-y-2 relative" ref={nomeRef}>
+                <label className="text-sm font-bold text-text-title">
+                  Nome da Regra <span className="text-red-500">*</span>
+                </label>
                 <input
-                  type="date"
-                  name="vigencia_fim"
-                  value={filters.vigencia_fim}
+                  name="nome_regra"
+                  value={filters.nome_regra}
                   onChange={handleChange}
-                  className="w-36 border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600"
+                  autoComplete="off"
+                  onFocus={() => filters.nome_regra.length > 0 && setShowNomeDropdown(true)}
+                  placeholder="Ex: Validação de Elegibilidade de Bolsista"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-secondary/20 outline-none transition-all text-secondary"
                 />
+                {showNomeDropdown && nomeSuggestions.length > 0 && (
+                  <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-xl max-h-48 overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200">
+                    {nomeSuggestions.map((suggestion, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleSelectSuggestion('nome_regra', suggestion)}
+                        className="w-full text-left px-4 py-2.5 text-xs font-medium text-secondary hover:bg-secondary/5 hover:text-secondary transition-colors"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sistema Dropdown */}
+              <div className="w-56 space-y-2">
+                <label className="text-sm font-bold text-text-title">Sistema:</label>
+                <select
+                  name="sistema"
+                  value={filters.sistema || ''}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600 bg-white"
+                >
+                  <option value="">Todos</option>
+                  {systems.map((sys, idx) => (
+                    <option key={idx} value={sys.nome}>{sys.nome}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Categoria Dropdown */}
+              <div className="w-56 space-y-2">
+                <label className="text-sm font-bold text-text-title">Módulo:</label>
+                <select
+                  name="categoria"
+                  value={filters.categoria || ''}
+                  onChange={handleChange}
+                  disabled={!filters.sistema}
+                  className={`w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600 bg-white ${
+                    !filters.sistema ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
+                >
+                  <option value="">Todos</option>
+                  {modulosDisponiveis.map((mod, idx) => (
+                    <option key={idx} value={mod}>{mod}</option>
+                  ))}
+                </select>
               </div>
             </div>
 
-            <div className="w-72 space-y-2">
-              <label className="text-sm font-bold text-text-title">Status:</label>
-              <select
-                name="status"
-                value={filters.status || ''}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600 bg-white"
-              >
-                <option value="">Todos</option>
-                <option value="Ativo">Ativo</option>
-                <option value="Pendente">Pendente</option>
-                <option value="Excluída">Excluída</option>
-              </select>
-            </div>
+            <div className="flex flex-wrap items-end gap-6 text-sm">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-text-title">Vigência (Período):</label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="date"
+                    name="vigencia_inicio"
+                    value={filters.vigencia_inicio}
+                    onChange={handleChange}
+                    className="w-36 border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600"
+                  />
+                  <span className="text-gray-400">até</span>
+                  <input
+                    type="date"
+                    name="vigencia_fim"
+                    value={filters.vigencia_fim}
+                    onChange={handleChange}
+                    className="w-36 border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600"
+                  />
+                </div>
+              </div>
 
-            <div className="flex space-x-3 lg:ml-8">
-              <button
-                onClick={handleSearch}
-                className="flex items-center justify-center px-6 h-[42px] bg-secondary text-white rounded-lg font-black text-[12px] hover:bg-secondary/90 transition-all shadow-md shadow-secondary/10 active:scale-95 uppercase tracking-widest leading-none outline-none"
-              >
-                <Search size={16} className="mr-2" /> Consultar
-              </button>
-              <button
-                onClick={handleClear}
-                className="flex items-center justify-center px-6 h-[42px] border border-gray-300 text-gray-400 rounded-lg text-[12px] font-black hover:bg-gray-50 transition-all hover:border-gray-400 uppercase tracking-widest leading-none outline-none"
-              >
-                <RotateCcw size={16} className="mr-2" /> Limpar
-              </button>
+              <div className="w-72 space-y-2">
+                <label className="text-sm font-bold text-text-title">Status:</label>
+                <select
+                  name="status"
+                  value={filters.status || ''}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none focus:ring-2 focus:ring-secondary/20 transition-all text-gray-600 bg-white"
+                >
+                  <option value="">Todos</option>
+                  <option value="Ativo">Ativo</option>
+                  <option value="Pendente">Pendente</option>
+                  <option value="Excluída">Excluída</option>
+                </select>
+              </div>
+
+              <div className="flex space-x-3 lg:ml-8">
+                <button
+                  onClick={handleSearch}
+                  className="flex items-center justify-center px-6 h-[42px] bg-secondary text-white rounded-lg font-black text-[12px] hover:bg-secondary/90 transition-all shadow-md shadow-secondary/10 active:scale-95 uppercase tracking-widest leading-none outline-none"
+                >
+                  <Search size={16} className="mr-2" /> Consultar
+                </button>
+                <button
+                  onClick={handleClear}
+                  className="flex items-center justify-center px-6 h-[42px] border border-gray-300 text-gray-400 rounded-lg text-[12px] font-black hover:bg-gray-50 transition-all hover:border-gray-400 uppercase tracking-widest leading-none outline-none"
+                >
+                  <RotateCcw size={16} className="mr-2" /> Limpar
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Seção de Resultados */}
       <div className="bg-white rounded-card shadow-card overflow-hidden border border-gray-100">
