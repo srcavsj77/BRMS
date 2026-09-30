@@ -32,7 +32,7 @@ const menuItems = [
     label: 'Conformidade',
     displayLabel: 'Acervo documental',
     hasDropdown: true,
-    subItems: [{ label: 'Documentos' }],
+    subItems: [{ label: 'Documentos' }, { label: 'Projetos documentados' }, { label: 'Listar/Projetos' }],
   },
   {
     icon: ClipboardCheck,

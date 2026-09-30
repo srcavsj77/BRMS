@@ -35,6 +35,8 @@ export const DEFAULT_PERMISSIONS = {
     'Excluir sistema',
     'Conformidade',
     'Documentos',
+    'Projetos documentados',
+    'Listar/Projetos',
     'Configurações',
     'Monitoramento',
     'Controle de Acesso',
@@ -57,6 +59,8 @@ export const DEFAULT_PERMISSIONS = {
     'Associar Módulos',
     'Conformidade',
     'Documentos',
+    'Projetos documentados',
+    'Listar/Projetos',
     'Configurações',
     'Monitoramento',
     'Controle de Acesso',
@@ -73,6 +77,8 @@ export const DEFAULT_PERMISSIONS = {
     'Dashboard',
     'Conformidade',
     'Documentos',
+    'Projetos documentados',
+    'Listar/Projetos',
     'Configurações',
     'Monitoramento',
     'Usuários',
@@ -101,6 +107,8 @@ export const ALL_SYSTEM_MENUS = [
   'Excluir sistema',
   'Conformidade',
   'Documentos',
+  'Projetos documentados',
+  'Listar/Projetos',
   'Configurações',
   'Monitoramento',
   'Usuários',
@@ -109,7 +117,21 @@ export const ALL_SYSTEM_MENUS = [
 ];
 
 /**
- * Verifica se um usuário tem permissão para acessar um item.
+ * Verifica se um usuário possui permissão para acessar determinado recurso do sistema.
+ * 
+ * A validação é feita checando se o usuário está ativo (não bloqueado), 
+ * liberando itens de acesso global ("Home" e "Sobre o sistema"), e consultando as
+ * permissões dinâmicas definidas no perfil (profilesList) ou as permissões padrão.
+ * 
+ * @param {Object} user - Dados do usuário atual logado (contendo status e role).
+ * @param {string} itemLabel - Identificador do menu ou ação que se deseja acessar.
+ * @param {Array} [profilesList=null] - Lista opcional de perfis dinâmicos carregados da API.
+ * @returns {boolean} Retorna true se o usuário tiver permissão e false caso contrário.
+ * 
+ * @futuras-melhorias
+ * - Implementar cache local das permissões avaliadas para otimizar renderizações repetidas no React.
+ * - Integrar com sistema de controle baseado em hierarquia (ABAC - Attribute-Based Access Control) se necessário.
+ * - Adicionar logs das auditorias de tentativas de acesso negado na interface.
  */
 export const checkPermission = (user, itemLabel, profilesList = null) => {
   if (!user || user.status === 'Bloqueado') return false;

@@ -3,6 +3,19 @@
  * Padrão obrigatório para todos os inputs do sistema
  */
 
+/**
+ * Sanitiza textos contra injeções SQL (SQL Injection) no lado do cliente.
+ * 
+ * Remove caracteres de comentários (--, /*, *\/) e expressões SQL comuns
+ * (SELECT, DROP, DELETE, etc.) do texto digitado pelo usuário.
+ * 
+ * @param {string} text - O texto inserido no input.
+ * @returns {string} O texto limpo de padrões de injeção SQL.
+ * 
+ * @futuras-melhorias
+ * - Adicionar sanitização de tags HTML/XSS (Cross-Site Scripting) usando biblioteca especializada como DOMPurify.
+ * - Tornar a detecção configurável por tipo de campo (ex: permitir palavras-chave SQL em campos de código e bloquear em campos de texto simples).
+ */
 export const sanitizeSQL = (text) => {
   if (typeof text !== 'string') return text;
 
@@ -26,7 +39,19 @@ export const sanitizeSQL = (text) => {
 };
 
 /**
- * Hook ou Helper para lidar com mudanças de input com segurança
+ * Helper para lidar com mudanças em inputs do React de forma segura.
+ * 
+ * Intercepta o evento de alteração do formulário, higieniza o valor do input contra
+ * SQL Injection usando `sanitizeSQL` e atualiza o estado correspondente do formulário.
+ * Emite um aviso no console caso um padrão de ataque seja bloqueado.
+ * 
+ * @param {Event} e - Evento de mudança do elemento input.
+ * @param {Function} setFormData - Função de atualização de estado do componente React.
+ * @returns {void}
+ * 
+ * @futuras-melhorias
+ * - Exibir alerta visual amigável (Toast/Tooltip) na tela quando um caractere malicioso for removido.
+ * - Integrar com validação de schemas do Zod ou Yup no nível do formulário para centralizar a segurança.
  */
 export const handleSafeChange = (e, setFormData) => {
   const { name, value } = e.target;

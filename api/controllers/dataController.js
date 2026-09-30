@@ -3,6 +3,21 @@ const path = require('path');
 const bcrypt = require('bcryptjs');
 const dbFile = path.join(__dirname, '../../db.json');
 
+/**
+ * Obtém os dados completos cadastrados no banco de dados (db.json).
+ * 
+ * Esta função lê o arquivo JSON do banco de dados e mascara ou remove 
+ * as senhas dos usuários antes de enviar a resposta, garantindo que
+ * dados confidenciais de credenciais não sejam expostos ao cliente.
+ * 
+ * @param {Object} req - Objeto de requisição do Express.
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {void}
+ * 
+ * @futuras-melhorias
+ * - Migrar a persistência baseada em arquivo (db.json) para um banco de dados relacional (ex: PostgreSQL/Oracle).
+ * - Implementar cache dos dados com Redis para reduzir I/O de disco.
+ */
 const getData = (req, res) => {
   try {
     const data = JSON.parse(fs.readFileSync(dbFile, 'utf-8'));
@@ -22,6 +37,22 @@ const getData = (req, res) => {
   }
 };
 
+/**
+ * Salva as alterações feitas nos dados (regras, sistemas, usuários, etc.) no banco de dados.
+ * 
+ * Esta função valida se a alteração requer o Sudo Mode (reautenticação do administrador)
+ * caso envolva modificação de usuários ou suas permissões/senhas. Também realiza o hash
+ * de novas senhas cadastradas usando bcrypt antes de gravar os dados no arquivo db.json.
+ * 
+ * @param {Object} req - Objeto de requisição do Express contendo os novos dados no body e a senha de confirmação do admin no cabeçalho x-admin-confirm-password.
+ * @param {Object} res - Objeto de resposta do Express.
+ * @returns {void}
+ * 
+ * @futuras-melhorias
+ * - Implementar travas de concorrência (Optimistic/Pessimistic Locking) para evitar sobrescritas acidentais de dados.
+ * - Integrar auditoria automática persistindo a diferença (diff) detalhada de quem alterou o quê.
+ * - Adicionar transações para garantir atomicidade nas operações de gravação.
+ */
 const saveData = (req, res) => {
   try {
     const existingData = JSON.parse(fs.readFileSync(dbFile, 'utf-8'));

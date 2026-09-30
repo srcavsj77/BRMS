@@ -1,6 +1,16 @@
 /**
- * Detecta conflitos simples entre as regras.
- * Neste protótipo, um conflito é definido por regras com o mesmo nome ou ID.
+ * Detecta conflitos simples entre as regras de negócio carregadas.
+ * 
+ * Um conflito é definido pela colisão de chaves exclusivas, como regras com 
+ * o mesmo nome ou com o mesmo identificador de regra (id_regra).
+ * 
+ * @param {Array} regras - Vetor contendo a lista de objetos das regras de negócio.
+ * @returns {Array} Vetor contendo os conflitos identificados (regra_id, nome, motivo).
+ * 
+ * @futuras-melhorias
+ * - Ampliar a detecção para analisar colisões semânticas (duas regras com nomes diferentes mas com mesma lógica expressa).
+ * - Comparar faixas de vigência para identificar se o conflito ocorre simultaneamente no tempo.
+ * - Gerar alertas proativos para a área de negócios quando um conflito for detectado.
  */
 export const detectarConflitos = (regras) => {
   const conflitos = [];
@@ -23,7 +33,14 @@ export const detectarConflitos = (regras) => {
 };
 
 /**
- * Verifica se a regra expirou com base na data atual.
+ * Verifica se a regra de negócio está expirada em relação à data atual do sistema.
+ * 
+ * @param {Object} regra - Objeto contendo os dados da regra de negócio (especificamente vigencia_fim).
+ * @returns {boolean} Retorna true se a data de fim for inferior à data atual (desconsiderando horas).
+ * 
+ * @futuras-melhorias
+ * - Adicionar tolerância de expiração em dias (ex: regras que expirarão em menos de 5 dias).
+ * - Enviar emails de alerta para a equipe de compliance quando a expiração for confirmada.
  */
 export const verificarExpiracao = (regra) => {
   if (!regra.vigencia_fim) return false;

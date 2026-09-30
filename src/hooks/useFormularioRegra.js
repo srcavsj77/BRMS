@@ -10,6 +10,14 @@ import { sanitizeSQL } from '../utils/security';
  * @returns {Object} Estado e funções de manipulação do formulário.
  */
 export const useFormularioRegra = (dadosIniciais, ehEdicao, sistemas = []) => {
+  /**
+   * Obtém a data e hora atual formatadas como "YYYY-MM-DD HH:MM".
+   * 
+   * @returns {string} String contendo a data e hora atual.
+   * 
+   * @futuras-melhorias
+   * - Usar biblioteca dayjs/date-fns para tratamento flexível de fusos horários e formatos de exibição.
+   */
   const obterDataHoraAtual = () => {
     const d = new Date();
     return (
@@ -25,6 +33,17 @@ export const useFormularioRegra = (dadosIniciais, ehEdicao, sistemas = []) => {
     );
   };
 
+  /**
+   * Gera a estrutura de dados inicial padrão para uma nova regra.
+   * 
+   * Preenche chaves padrão (ID aleatório, data_criacao, data_atualizacao, status)
+   * e deixa os campos de entrada de formulário limpos.
+   * 
+   * @returns {Object} O objeto contendo o estado inicial do formulário de regra.
+   * 
+   * @futuras-melhorias
+   * - Substituir a geração de ID aleatório RULE-XXXX por chamada ao backend para reservar ID sequencial ou usar UUID.
+   */
   const criarEstadoInicial = () => ({
     id: 'RULE-' + Math.floor(Math.random() * 10000),
     nome: '',
@@ -46,6 +65,11 @@ export const useFormularioRegra = (dadosIniciais, ehEdicao, sistemas = []) => {
 
   const [dadosFormulario, setDadosFormulario] = useState(criarEstadoInicial());
 
+  /**
+   * Limpa ou reinicia todos os campos do formulário para o estado padrão.
+   * 
+   * @returns {void}
+   */
   const resetarFormulario = () => setDadosFormulario(criarEstadoInicial());
 
   const [categorias, setCategorias] = useState([
@@ -81,6 +105,17 @@ export const useFormularioRegra = (dadosIniciais, ehEdicao, sistemas = []) => {
     }
   }, [dadosFormulario.sistema_associado, sistemas, ehEdicao]);
 
+  /**
+   * Recarrega e preenche o formulário com dados existentes de uma regra selecionada.
+   * 
+   * Utilizado no modo de edição para mapear chaves retornadas da API/mock para o estado interno.
+   * 
+   * @param {Object} [novosDados=null] - Dados substitutos aos dados iniciais, se houver.
+   * @returns {void}
+   * 
+   * @futuras-melhorias
+   * - Mapear e desanexar de forma mais dinâmica chaves não editáveis ou de controle de auditoria histórica.
+   */
   const recarregarDados = (novosDados = null) => {
     const dados = novosDados || dadosIniciais;
     if (ehEdicao && dados) {
@@ -111,8 +146,15 @@ export const useFormularioRegra = (dadosIniciais, ehEdicao, sistemas = []) => {
   }, [ehEdicao, dadosIniciais]);
 
   /**
-   * Lida com as mudanças nos campos de input, aplicando sanitização.
+   * Lida com as mudanças nos campos de input, higienizando-os em tempo real.
+   * 
+   * Aplica a função de sanitização SQL Injection antes de atualizar o estado.
+   * 
    * @param {Event} evento - Evento de mudança do input.
+   * @returns {void}
+   * 
+   * @futuras-melhorias
+   * - Integrar aviso visual na tela quando caracteres perigosos forem interceptados no formulário.
    */
   const lidarComMudanca = (evento) => {
     const { name, value } = evento.target;

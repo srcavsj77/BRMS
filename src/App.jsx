@@ -8,6 +8,8 @@ import AuditReports from './pages/AuditReports';
 import CreateSystem from './pages/CreateSystem';
 import AssociateModules from './pages/AssociateModules';
 import ComplianceDocuments from './pages/ComplianceDocuments';
+import DocumentedProjects from './pages/DocumentedProjects';
+import ListProjects from './pages/ListProjects';
 import Settings from './pages/Settings';
 import UsersManagement from './pages/UsersManagement';
 import EditSystem from './pages/EditSystem';
@@ -41,6 +43,8 @@ function App() {
   const [usersList, setUsersList] = useState([]);
   const [notices, setNotices] = useState([]);
   const [historicoRegras, setHistoricoRegras] = useState([]);
+  const [projetos, setProjetos] = useState([]);
+  const [historicoProjetos, setHistoricoProjetos] = useState([]);
 
   const [isServiceRunning, setIsServiceRunning] = useState(true);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
@@ -105,6 +109,8 @@ function App() {
         setUsersList(data.usersList || []);
         setNotices(data.notices || []);
         setHistoricoRegras(data.historicoRegras || []);
+        setProjetos(data.projetos || []);
+        setHistoricoProjetos(data.historicoProjetos || []);
       } catch (err) {
         console.error('Erro ao buscar dados do servidor central:', err);
         if (err.status === 401 || err.status === 403) {
@@ -136,6 +142,8 @@ function App() {
           usersList,
           notices,
           historicoRegras,
+          projetos,
+          historicoProjetos,
         });
       } catch (err) {
         console.error('Erro ao sincronizar dados com o servidor:', err);
@@ -150,7 +158,7 @@ function App() {
     };
 
     saveData();
-  }, [regras, eventosAuditoria, systems, profilesList, notices, historicoRegras, isLoaded, authToken]);
+  }, [regras, eventosAuditoria, systems, profilesList, notices, historicoRegras, projetos, historicoProjetos, isLoaded, authToken]);
 
   const handleUpdateUsers = async (newUsersList, adminPassword) => {
     try {
@@ -162,6 +170,8 @@ function App() {
         usersList: newUsersList,
         notices,
         historicoRegras,
+        projetos,
+        historicoProjetos,
       }, true, {
         'X-Admin-Confirm-Password': adminPassword
       });
@@ -290,6 +300,96 @@ function App() {
       justificativa: isEdit ? (novaRegra.justificativa_alteracao || 'Edição de regra') : 'Criação original'
     };
     setHistoricoRegras((prev) => [...prev, historicoItem]);
+  };
+
+  /**
+   * Realiza a importação em lote de regras de negócio.
+   * 
+   * Formata os dados importados do arquivo, mescla com a lista existente de regras 
+   * (sobrescrevendo regras com o mesmo ID ou adicionando novas), gera os registros
+   * de histórico de versão para todas elas e insere um evento de auditoria global.
+   * 
+   * @param {Array} regrasImportadas - Lista de regras brutas importadas via arquivo.
+   * @returns {void}
+   */
+  const handleImportRules = (regrasImportadas) => {
+    const dataHoraImportacao = (function () {
+      const d = new Date();
+      return (
+        d.getFullYear() +
+        '-' +
+        String(d.getMonth() + 1).padStart(2, '0') +
+        '-' +
+        String(d.getDate()).padStart(2, '0') +
+        ' ' +
+        String(d.getHours()).padStart(2, '0') +
+        ':' +
+        String(d.getMinutes()).padStart(2, '0')
+      );
+    })();
+
+    const novasRegrasFormatadas = regrasImportadas.map((r) => {
+      const idRegra = r.id_regra || 'RULE-' + Math.floor(Math.random() * 10000);
+      return {
+        id_regra: idRegra,
+        nome: r.nome,
+        versao: r.versao || '1.0.0',
+        descricao: r.descricao,
+        sistema: r.sistema,
+        categoria: r.categoria,
+        criticidade: r.criticidade || 'Média',
+        usuario: currentUser?.name || r.usuario || 'Sistema',
+        criacao: r.criacao || dataHoraImportacao,
+        modificacao: dataHoraImportacao,
+        status: r.status || 'Ativo',
+        vigencia_inicio: r.vigencia_inicio || '',
+        vigencia_fim: r.vigencia_fim || '',
+        expressao: r.expressao,
+      };
+    });
+
+    // 1. Atualizar regras na lista principal
+    setRegras((prev) => {
+      let updated = [...prev];
+      novasRegrasFormatadas.forEach((nova) => {
+        const idx = updated.findIndex((r) => r.id_regra === nova.id_regra);
+        if (idx !== -1) {
+          updated[idx] = nova;
+        } else {
+          updated.push(nova);
+        }
+      });
+      return updated;
+    });
+
+    // 2. Registrar no histórico de versões
+    const novosHistoricos = novasRegrasFormatadas.map((regraFormatada) => ({
+      id_historico: `hist-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      id_regra: regraFormatada.id_regra,
+      nome: regraFormatada.nome,
+      versao: regraFormatada.versao,
+      descricao: regraFormatada.descricao,
+      sistema: regraFormatada.sistema,
+      categoria: regraFormatada.categoria,
+      criticidade: regraFormatada.criticidade,
+      expressao: regraFormatada.expressao,
+      status: regraFormatada.status,
+      vigencia_inicio: regraFormatada.vigencia_inicio,
+      vigencia_fim: regraFormatada.vigencia_fim,
+      usuario: regraFormatada.usuario,
+      data_alteracao: dataHoraImportacao,
+      justificativa: 'Importação automática via arquivo padrão',
+    }));
+
+    setHistoricoRegras((prev) => [...prev, ...novosHistoricos]);
+
+    // 3. Registrar na auditoria
+    addEventoAuditoria({
+      usuario: currentUser?.name || 'Sistema',
+      regra_id: 'SISTEMA',
+      alteracao: `Importação em lote realizada: ${novasRegrasFormatadas.length} regras de negócio processadas.`,
+      status: 'Novo',
+    });
   };
 
   const handleRollbackRule = (historicoItem) => {
@@ -542,6 +642,7 @@ function App() {
           historicoRegras={historicoRegras}
           onRollback={handleRollbackRule}
           initialSystemFilter={selectedSystemFilter}
+          onImport={handleImportRules}
         />
       )}
       {currentPage === 'Alterações realizadas' && (
@@ -570,7 +671,28 @@ function App() {
           initialSystem={selectedSystemForModules}
         />
       )}
-      {currentPage === 'Documentos' && <ComplianceDocuments />}
+       {currentPage === 'Documentos' && <ComplianceDocuments />}
+       {currentPage === 'Projetos documentados' && (
+         <DocumentedProjects
+           projetos={projetos}
+           setProjetos={setProjetos}
+           regras={regras}
+           systems={systems}
+           currentUser={currentUser}
+         />
+       )}
+        {currentPage === 'Listar/Projetos' && (
+          <ListProjects
+            projetos={projetos}
+            setProjetos={setProjetos}
+            regras={regras}
+            systems={systems}
+            currentUser={currentUser}
+            historicoProjetos={historicoProjetos}
+            setHistoricoProjetos={setHistoricoProjetos}
+            profilesList={profilesList}
+          />
+        )}
       {currentPage === 'Monitoramento' && (
         <Settings
           isServiceRunning={isServiceRunning}
